@@ -90,3 +90,13 @@ in memory and per process; the usher funds guests from one testnet account that 
 Known gaps: the audit cannot recompute pair history, record, stranger-break rate or the chat read (attested, bounded); refusals do not record
 bankroll/Jar facts on chain; the USD-to-NEAR rate is a fixed demo constant; the model call and signature need a NEAR AI key; Mabel's seed phrase for
 the Phase 0 account was printed once in a session log (testnet, no value).
+
+## Phase 5 (league, partial)
+
+| Claim | Evidence |
+|---|---|
+| Characters play each other on chain with no human | `docs/receipts/audit-epoch1-all-six.txt` (games 43-48 among the PASS rows); `app/scripts/league.ts`; `/league` |
+| League games pass the audit on the sealing side | same file, 33 PASS, 0 FAIL |
+| The league can run on a schedule | `.github/workflows/league.yml` (not yet running: repository secrets are not set) |
+
+Known gaps: backing, apology fee, outside agents not built; the Swear Jar is 0 because no mutual betrayal has happened in the sample; the player side of league games is not audited.

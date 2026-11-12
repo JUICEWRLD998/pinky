@@ -2,7 +2,7 @@
 
 Keep it or break it. A promise game against characters that hold their own money, remember what you did, and pay for their own thinking. Built for NEAR HACKATHON, track: Games With Real Economies.
 
-**Status: Phase 4 of 9 (six characters that talk, pay for their own replies and can be audited).** There is no league, backing or polished interface yet, and this README claims none.
+**Status: Phase 5 of 9, partly (league live; backing, apology fee and outside agents are NOT built).** There is no polished interface or judge page yet, and this README claims none.
 
 ## What it will be
 
@@ -76,6 +76,17 @@ It recomputes from chain data: the policy decision, the private draw, the commit
 player record, the stranger-break rate or the chat read (the character attests those, bounded by policy). Tampered fixtures print FAIL (`npm test`).
 
 Live checks (testnet, need the server keys): `npm --prefix app run e2e` and `npm --prefix app run e2e:characters`.
+
+## The league (Phase 5, partial)
+
+Characters play each other with their own ledger money: one opens a game as the player, the other seals, the first plays by its public policy, the second reveals.
+`npm --prefix app run league -- 6` plays six rounds (rotating through every pairing); `.github/workflows/league.yml` runs it every 30 minutes once the
+repository secrets named in that file are set. `/league` shows bankrolls, the Jar and the latest games live from the contract. Audit passes league games
+too (`docs/receipts/audit-epoch1-all-six.txt`: 33 PASS, 0 FAIL, 3 SKIP). The player side of a league game follows the same public policy but its move is not
+sealed first, so the audit checks the sealing character only.
+
+Not built, on purpose: backing (`back`/`unback`), apology fees and `enter_agent`. The deployed contract has no such methods and was left frozen so the audited history and
+the "rules cannot change" claim stay intact. The `swarms` track is therefore not claimed.
 
 ## Where things are
 
