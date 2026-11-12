@@ -71,5 +71,7 @@ and 121.5.
 | The usher is rate limited (3 per IP per hour, 40 overall) | `app/server/limit.ts`, `app/test/limit.test.ts` (6 tests, one planted control) |
 | Otis's move comes from his public policy and an epoch-secret draw | `app/server/otis.ts`, `core/policy.ts`, `core/rng.ts` |
 
-Known gaps: five-person playtest not done; stranger-break rate is a fixed 2000 bps until Phase 4 measures it; the limiter is
+| The live e2e suite passes on testnet | `cd app && npm run e2e` (planted control included) |
+
+Known gaps: five-person playtest not done (no testers; "do people start a second game unprompted" is unmeasured); stranger-break rate is a fixed 2000 bps until Phase 4 measures it; the limiter is
 in memory and per process; the usher funds guests from one testnet account that needs faucet top-ups.
