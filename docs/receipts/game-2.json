@@ -1,0 +1,27 @@
+{
+  "game_id": 2,
+  "guest": "g-53835e7a18.guests.fad-pilot1.testnet",
+  "character": "otis.fad-pilot1.testnet",
+  "stake": "10000000000000000000000",
+  "seconds": 16.446,
+  "at": "2026-11-12T20:09:15.571Z",
+  "txs": {
+    "create_guest": "G8ydWDqWD7ZN7hvspTZ17qL4j4CgEp7mWh85ERHjE6Eg",
+    "deposit": "6xP7qgZFENw14SZu7N3cY9XUo5MpVLWUGpMKD1Yijy2W",
+    "open": "6NNRdg6JTEtBab6QTx5P9WatQbXDkmuPmae48T1CEnNw",
+    "seal": "G7jahXwqZpceQXVxc25YDiBWotsEs5A43w9ZEapKthuf",
+    "play": "7L7unSvmzrpz3aB8sG2PXn658aUHWPLSQFEQKjpWFUzs",
+    "reveal": "CuNDZ6wyMxMeeypixT9szPoyxFaCv4medHzwpcfGNZtX"
+  },
+  "moves": {
+    "player": "KEEP",
+    "character": "KEEP"
+  },
+  "outcome": {
+    "kind": "both_keep",
+    "player_payout": "10000000000000000000000",
+    "character_payout": "10000000000000000000000",
+    "jar_delta": "0",
+    "house": "0"
+  }
+}

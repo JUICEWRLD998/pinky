@@ -60,3 +60,18 @@ and 121.5.
 - The deployed wasm was built non-reproducibly on the author machine. The sha256 is recorded; a reproducible build is not claimed.
 - No testnet game has been played yet; the on-chain game is the Phase 3 gate.
 - A player can have at most 3 open games and a character can only open games its balance covers; these are anti-spam limits, not fairness proofs.
+
+## Phase 3 (thin path)
+
+| Claim | Evidence |
+|---|---|
+| A guest account holds only a function-call key and no full-access key | `app/server/usher.ts` builds one tx: CreateAccount, Transfer, AddFunctionCallAccessKey. Check keys: `near account list-keys <guest>` |
+| A full game runs from a clean browser in under 60 s | `docs/receipts/browser-game.json` (17 s, four tx hashes), `docs/receipts/browser-game.png` |
+| The same flow runs from the command line | `cd app && npm run play`; `docs/receipts/game-2.json` |
+| The usher is rate limited (3 per IP per hour, 40 overall) | `app/server/limit.ts`, `app/test/limit.test.ts` (6 tests, one planted control) |
+| Otis's move comes from his public policy and an epoch-secret draw | `app/server/otis.ts`, `core/policy.ts`, `core/rng.ts` |
+
+| The live e2e suite passes on testnet | `cd app && npm run e2e` (planted control included) |
+
+Known gaps: five-person playtest not done (no testers; "do people start a second game unprompted" is unmeasured); stranger-break rate is a fixed 2000 bps until Phase 4 measures it; the limiter is
+in memory and per process; the usher funds guests from one testnet account that needs faucet top-ups.

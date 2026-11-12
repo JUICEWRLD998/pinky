@@ -2,7 +2,7 @@
 
 Keep it or break it. A promise game against characters that hold their own money, remember what you did, and pay for their own thinking. Built for NEAR HACKATHON, track: Games With Real Economies.
 
-**Status: Phase 2 of 9 (rules, simulation, contract on testnet).** There is no app, talking character or audit yet, and this README claims none. Each phase is merged to `main` only when its gate passes.
+**Status: Phase 3 of 9 (thin path: one character, scripted lines, plain UI, real chain).** There is no talking character, league or audit yet, and this README claims none. Each phase is merged to `main` only when its gate passes.
 
 ## What it will be
 
@@ -39,6 +39,19 @@ cargo near build non-reproducible-wasm
 cd ../integration && PINKY_WASM=<path to pinky_contract.wasm> cargo test   # 4 sandbox tests
 ```
 
+## Play one game (Phase 3)
+
+Needs Node 24 and a `.env` with the server keys (names in `.env.example`). Only Otis exists, with scripted lines.
+
+```
+cd app && npm install
+npm run play            # a stranger's whole game from the command line, prints 4 tx hashes, saves docs/receipts/game-N.json
+npm run build && npm start   # the web table on http://localhost:3100
+```
+
+A guest account holds only a function-call key for `open_game`, `play`, `withdraw`, `claim_timeout`. The server seals and reveals
+Otis's move; the move comes from his public policy and a draw from his epoch secret. Receipts: `docs/receipts/`.
+
 ## Where things are
 
 | Path | What |
@@ -50,12 +63,13 @@ cd ../integration && PINKY_WASM=<path to pinky_contract.wasm> cargo test   # 4 s
 | `sim/` | Seeded economy simulation, runner and chart |
 | `contract/` | Rust contract, payoff module, golden-vector and game tests |
 | `integration/` | Sandbox tests on the compiled wasm |
+| `app/` | Next.js table, API routes (usher, seal, reveal), server logic, setup and play scripts |
 | `CLAIMS.md` | Every claim with the file or command behind it, and the known gaps |
 | `DECISIONS.md` | Dated design decisions |
 
 ## What is not done
 
-App, characters that talk, audit command, league, hosted demo. See `CLAIMS.md` for the gaps in the
+Five-person playtest, characters that talk, audit command, league, hosted demo. See `CLAIMS.md` for the gaps in the
 simulation numbers (backing cost is high, apology fees were never exercised by the simulation).
 
 ## Licence

@@ -1,0 +1,4 @@
+:root { --bg: #0d1117; --panel: #151b24; --line: #263040; --text: #e8edf3; --muted: #9aa7b8; --accent: #4fd1b0; --warn: #f2a65a; --bad: #ef6f6c; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif; }
+a { color: var(--accent); }
