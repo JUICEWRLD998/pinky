@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev -p 3100",
     "build": "next build",
-    "start": "next start -p 3100"
+    "start": "next start -p 3100",
+    "setup": "node --env-file=../.env scripts/setup.ts"
   },
   "dependencies": {
     "near-api-js": "^7.5.3",
