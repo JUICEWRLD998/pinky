@@ -4,7 +4,7 @@ A phase is merged to `main` only when its gate passes, from a clean clone, with 
 
 | Phase | Gate | Status |
 |---|---|---|
-| 0 Toolchain | `cargo near --version` and `near --version` print inside WSL; a testnet RPC view call returns; one NEAR AI chat completion returns with the key | tools installing, key pending |
+| 0 Toolchain | `cargo near --version` and `near --version` print inside WSL; a testnet RPC view call returns; one NEAR AI chat completion returns with the key | PASSED 2026-11-12: cargo-near 0.23.0, near-cli-rs 0.31.1, wasm32 target, testnet view_account, NEAR AI completion 200 |
 | 1 Rules and simulation | `npm test` green; `npm run sim -- --seed 7` prints identical numbers twice | PASSED 2026-11-12, merged |
 | 2 Contract | Unit and sandbox tests green; contract deployed on testnet; address and deploy tx hash in README | open |
 | 3 Thin path | A stranger on a clean browser plays one full game in under 60 seconds; four tx hashes saved; five-person playtest asks for a second game | open |
