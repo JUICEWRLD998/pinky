@@ -13,6 +13,7 @@
     "play": "node --env-file=../.env scripts/play-once.ts",
     "setup:characters": "node --env-file=../.env scripts/setup-characters.ts",
     "epoch": "node --env-file=../.env scripts/epoch.ts",
+    "league": "node --env-file=../.env scripts/league.ts",
     "setup": "node --env-file=../.env scripts/setup.ts"
   },
   "dependencies": {

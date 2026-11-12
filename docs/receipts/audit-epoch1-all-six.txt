@@ -1,0 +1,51 @@
+
+Mabel (mabel.fad-pilot1.testnet) epoch 1: 3 game(s), secret revealed on chain
+  game 18: SKIP  character_timeout: no sealed move to replay
+  game 19: PASS
+  game 20: PASS  closed door; stakes returned; bankroll and Jar not recorded on refusal, so not rechecked
+
+Otis (otis.fad-pilot1.testnet) epoch 1: 17 game(s), secret revealed on chain
+  game 1: SKIP  player_timeout: no sealed move to replay
+  game 2: PASS
+  game 3: SKIP  character_timeout: no sealed move to replay
+  game 4: PASS
+  game 5: PASS
+  game 6: PASS
+  game 7: PASS
+  game 8: PASS
+  game 9: PASS
+  game 10: PASS
+  game 11: PASS
+  game 12: PASS
+  game 13: PASS
+  game 14: PASS
+  game 15: PASS
+  game 16: PASS
+  game 17: PASS
+
+Fenn (fenn.fad-pilot1.testnet) epoch 1: 4 game(s), secret revealed on chain
+  game 23: PASS
+  game 29: PASS
+  game 35: PASS
+  game 47: PASS
+
+Prue (prue.fad-pilot1.testnet) epoch 1: 3 game(s), secret revealed on chain
+  game 24: PASS
+  game 30: PASS
+  game 36: PASS
+
+Dice (dice.fad-pilot1.testnet) epoch 1: 5 game(s), secret revealed on chain
+  game 25: PASS
+  game 31: PASS
+  game 37: PASS
+  game 43: PASS
+  game 48: PASS
+
+Abacus (abacus.fad-pilot1.testnet) epoch 1: 4 game(s), secret revealed on chain
+  game 26: PASS
+  game 32: PASS
+  game 38: PASS
+  game 44: PASS
+
+epoch 1: 33 PASS, 0 FAIL, 3 SKIP
+Recomputed from chain: policy decision, draw, commit, stake share, Jar rate. Attested by the character and bounded by policy: pair history, record, stranger-break rate, chat read.

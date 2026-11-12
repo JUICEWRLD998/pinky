@@ -44,3 +44,6 @@ The model list prices tokens in USD. Rounding up and a fixed demo rate keep the 
 
 ## 2026-11-12 Refusals are audited without bankroll and Jar facts
 The contract only records those at seal. The audit says so instead of failing refusals; the contract is frozen, so the gap is stated, not patched.
+
+## 2026-11-12 Phase 5 keeps the frozen contract
+A redeploy for backing and enter_agent would cost a long Rust build, a new address and the audited epoch history, and the features could not be finished and tested before the deadline. The league needs no contract change because a character account can open a game as the player. Backing, apology fees and outside agents are listed as not built, and the swarms track is not claimed.

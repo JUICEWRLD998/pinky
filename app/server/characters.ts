@@ -49,14 +49,19 @@ const id = (n: number | string) => String(n);
 
 /** The facts the policy reads, built only from contract views so the audit can rebuild them. */
 async function inputsFor(g: GameView, read: Read): Promise<PolicyInputs> {
+  return inputsBetween(g.player, g.character, g.stake, read);
+}
+
+/** Policy inputs for `me` deciding against `other`, where `other` is the one playing the "player" side of the history. */
+async function inputsBetween(player: string, character: string, stakeStr: string, read: Read): Promise<PolicyInputs> {
   const [pair, rec, cfg, jar, bal] = await Promise.all([
-    view<Pair>('get_pair', { player: g.player, character: g.character }),
-    view<Rec>('get_record', { account_id: g.player }),
+    view<Pair>('get_pair', { player, character }),
+    view<Rec>('get_record', { account_id: player }),
     view<Config>('get_config'),
     view<string>('get_jar'),
-    view<string>('get_balance', { account_id: g.character }),
+    view<string>('get_balance', { account_id: character }),
   ]);
-  const stake = BigInt(g.stake);
+  const stake = BigInt(stakeStr);
   // The stake already left Otis's ledger balance at open_game, so add it back for the bankroll he decided with.
   const bankroll = BigInt(bal) + stake;
   const bonus = (() => {
@@ -109,4 +114,22 @@ export async function revealGame(gameId: number): Promise<RevealResult> {
   const otis = characterAccount(spec.name);
   const r = await otis.callFunctionRaw({ contractId: GAME, methodName: 'reveal', args: { game_id: gameId, character_move: move, salt } });
   return { game_id: gameId, move, tx: r.transaction.hash };
+}
+
+/**
+ * League: a character playing the PLAYER side of a game against another character. Its move follows its own
+ * public policy, seen from the other character's history with it, and the same epoch-secret draw. The game
+ * is opened and played with the character's own key, so the money moving is the character's own.
+ */
+export async function leagueMove(gameId: number, playerName: string): Promise<{ move: Move; pKeepBps: number }> {
+  const g = await gameWhen(gameId, 'Sealed');
+  const spec = CHARACTERS.find((c) => c.name === playerName)!;
+  const me = accountOf(playerName);
+  if (g.player !== me) throw new Error('not this character game');
+  // From my side the opponent plays the "player" role in the pair history and the record.
+  const inp = await inputsBetween(g.character, me, g.stake, NEUTRAL);
+  const d = decide(spec, inp);
+  const p = d.open ? d.pKeepBps : 0;
+  const move = moveFor(p, drawBps(epochSecret(playerName, (await view<{ epoch: number }>('get_character', { account_id: me })).epoch), id(gameId)));
+  return { move, pKeepBps: p };
 }
