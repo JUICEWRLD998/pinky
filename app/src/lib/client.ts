@@ -3,7 +3,8 @@ import { Account, JsonRpcProvider, KeyPair, KeyPairSigner, getTransactionLastRes
 
 export const RPC = process.env.NEXT_PUBLIC_NEAR_RPC ?? 'https://test.rpc.fastnear.com';
 export const GAME = process.env.NEXT_PUBLIC_GAME_CONTRACT ?? 'pinky.fad-pilot1.testnet';
-export const OTIS = process.env.NEXT_PUBLIC_OTIS ?? 'otis.fad-pilot1.testnet';
+export const ROOT = process.env.NEXT_PUBLIC_ROOT ?? 'fad-pilot1.testnet';
+export const accountOf = (name: string): string => `${name.toLowerCase()}.${ROOT}`;
 export const EXPLORER = 'https://testnet.nearblocks.io';
 export const STAKE = 10n ** 22n; // 0.01 NEAR
 const GAS = 10n * 10n ** 12n;
@@ -60,11 +61,13 @@ export async function balanceOf(accountId: string): Promise<bigint> {
   return BigInt(b ?? '0');
 }
 
-export async function openGame(g: Guest): Promise<{ gameId: number; tx: string }> {
-  const r = await account(g).callFunctionRaw({ contractId: GAME, methodName: 'open_game', args: { character: OTIS, stake: STAKE.toString() }, gas: GAS });
+export async function openGame(g: Guest, character: string): Promise<{ gameId: number; tx: string }> {
+  const r = await account(g).callFunctionRaw({ contractId: GAME, methodName: 'open_game', args: { character: accountOf(character), stake: STAKE.toString() }, gas: GAS });
   return { gameId: Number(getTransactionLastResult(r)), tx: r.transaction.hash };
 }
-export const askSeal = (gameId: number) => post<{ game_id: number; refused: boolean; tx: string; reason: string }>('/api/seal', { game_id: gameId });
+export interface Talk { line: string; read: { promiseBps: number; threatBps: number; sincerityBps: number }; read_sig: string; quiet: boolean; paid?: { yocto: string; tx: string; chat_id: string; model: string } }
+export const askTalk = (gameId: number, message: string) => post<Talk>('/api/talk', { game_id: gameId, message });
+export const askSeal = (gameId: number, t?: Talk) => post<{ game_id: number; refused: boolean; tx: string; reason: string }>('/api/seal', { game_id: gameId, read: t?.read, read_sig: t?.read_sig });
 export async function playMove(g: Guest, gameId: number, move: Move): Promise<string> {
   const r = await account(g).callFunctionRaw({ contractId: GAME, methodName: 'play', args: { game_id: gameId, player_move: move }, gas: GAS });
   return r.transaction.hash;
@@ -76,7 +79,7 @@ export const near = (yocto: bigint | string): string => {
   return `${whole}.${frac.toString().padStart(4, '0')}`;
 };
 
-const GAME_KEY = 'pinky.game.v1';
-export const loadGame = (): number | null => { try { const v = localStorage.getItem(GAME_KEY); return v ? Number(v) : null; } catch { return null; } };
-export const rememberGame = (id: number) => { try { localStorage.setItem(GAME_KEY, String(id)); } catch { /* tab-only */ } };
+const GAME_KEY = 'pinky.game.v2';
+export const loadGame = (): { id: number; character: string } | null => { try { const v = localStorage.getItem(GAME_KEY); return v ? JSON.parse(v) : null; } catch { return null; } };
+export const rememberGame = (id: number, character: string) => { try { localStorage.setItem(GAME_KEY, JSON.stringify({ id, character })); } catch { /* tab-only */ } };
 export const forgetGame = () => { try { localStorage.removeItem(GAME_KEY); } catch { /* ignore */ } };
