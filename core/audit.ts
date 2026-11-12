@@ -49,14 +49,14 @@ export function auditGame(g: AuditGame, spec: CharacterSpec, secret: string | nu
   const d = decide(spec, snap.inputs);
   add('open/closed door matches the public policy', d.open === snap.open, `policy ${d.open ? 'open' : 'closed'}, snapshot ${snap.open ? 'open' : 'closed'}`);
   add('chance of keeping matches the public policy', d.pKeepBps === snap.pKeepBps, `policy ${d.pKeepBps}, snapshot ${snap.pKeepBps}`);
+  // `refuse` does not record the bankroll and Jar facts (only `seal` does), so those two checks apply to sealed games only.
+  if (kind === 'refused') {
+    add('a refusal needs a closed door', !d.open);
+    return done('closed door; stakes returned; bankroll and Jar not recorded on refusal, so not rechecked');
+  }
   const facts = recordedFacts(g, cfg);
   add('stake share matches what the contract recorded', snap.inputs.stakeBps === facts.stakeBps, `recorded ${facts.stakeBps}, snapshot ${snap.inputs.stakeBps}`);
   add('Jar rate matches what the contract recorded', snap.inputs.jarRateBps === facts.jarRateBps, `recorded ${facts.jarRateBps}, snapshot ${snap.inputs.jarRateBps}`);
-
-  if (kind === 'refused') {
-    add('a refusal needs a closed door', !d.open);
-    return done('closed door; stakes were returned');
-  }
   if (!secret) { add('epoch secret is revealed on chain', false, 'not revealed yet'); return done(); }
   const id = String(g.id);
   const draw = drawBps(secret, id);

@@ -9,6 +9,7 @@
   "scripts": {
     "test": "node --test \"test/*.test.ts\"",
     "sim": "node sim/run.ts",
-    "vectors": "node scripts/vectors.ts"
+    "vectors": "node scripts/vectors.ts",
+    "audit": "node app/scripts/audit.ts"
   }
 }

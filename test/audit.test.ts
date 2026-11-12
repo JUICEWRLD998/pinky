@@ -81,6 +81,7 @@ test('a refusal passes only when the policy really closes the door', () => {
   assert.equal(d.open, false);
   g.snapshot = JSON.stringify({ v: 1, inputs: s.inputs, pKeepBps: 0, open: false });
   g.outcome = { kind: 'refused' };
+  g.char_balance_at_seal = '0'; g.jar_at_seal = '0'; g.commit = null; g.character_move = null; // as the contract leaves them after a refusal
   assert.equal(auditGame(g, mabel, SECRET, cfg).verdict, 'PASS');
   const lie = genuine(12); lie.outcome = { kind: 'refused' };
   assert.equal(auditGame(lie, otis, SECRET, cfg).verdict, 'FAIL');

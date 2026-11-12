@@ -11,6 +11,7 @@
     "test": "node --test \"test/*.test.ts\"",
     "play": "node --env-file=../.env scripts/play-once.ts",
     "setup:characters": "node --env-file=../.env scripts/setup-characters.ts",
+    "epoch": "node --env-file=../.env scripts/epoch.ts",
     "setup": "node --env-file=../.env scripts/setup.ts"
   },
   "dependencies": {
