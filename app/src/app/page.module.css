@@ -15,3 +15,8 @@
 .verdict { font-size: 20px; font-weight: 600; margin: 0 0 8px; }
 .steps { margin: 0; padding-left: 18px; color: var(--muted); }
 .steps li { margin-bottom: 4px; }
+.cast { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.pick { appearance: none; border: 1px solid var(--line); background: var(--panel); color: var(--text); font: inherit; padding: 10px 16px; border-radius: 999px; cursor: pointer; min-height: 44px; }
+.picked { border-color: var(--accent); color: var(--accent); }
+.input { flex: 1; min-width: 0; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 12px; font: inherit; min-height: 48px; }
+.card .btn.primary { margin-top: 12px; }

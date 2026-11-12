@@ -4,7 +4,8 @@ import { KeyPair, getTransactionLastResult } from 'near-api-js';
 import { CHARACTERS, decide, moveFor } from '../../core/policy.ts';
 import { drawBps } from '../../core/rng.ts';
 import { GAME, GUEST_GAS, OTIS, milli, signerAccount, view, type GameView, type Move } from '../server/chain.ts';
-import { revealGame, sealGame } from '../server/otis.ts';
+import { epochSecret } from '../server/characters.ts';
+import { revealGame, sealGame } from '../server/characters.ts';
 import { usherGuest } from '../server/usher.ts';
 
 let fails = 0;
@@ -23,7 +24,6 @@ const me = signerAccount(guest.account_id, kp.toString());
 const call = (method: string, args: object, gas = GUEST_GAS) => me.callFunctionRaw({ contractId: GAME, methodName: method, args, gas });
 const stake = milli(10);
 const spec = CHARACTERS.find((c) => c.name === 'Otis')!;
-const secret = process.env.OTIS_EPOCH_SECRET!;
 
 async function game(move: Move) {
   const o = await call('open_game', { character: OTIS, stake: stake.toString() });
@@ -31,7 +31,8 @@ async function game(move: Move) {
   const s = await sealGame(id);
   await call('play', { game_id: id, player_move: move });
   const r = await revealGame(id);
-  const g = await view<GameView>('get_game', { game_id: id });
+  let g = await view<GameView>('get_game', { game_id: id });
+  for (let i = 0; i < 20 && g.status !== 'Settled'; i++) { await new Promise((x) => setTimeout(x, 500)); g = await view<GameView>('get_game', { game_id: id }); }
   return { id, g, s, r };
 }
 
@@ -51,7 +52,7 @@ ok('after our BREAK, Otis pKeep is 1000', snap3.pKeepBps === 1000, String(snap3.
 for (const x of [g1, g2, g3]) {
   const snap = JSON.parse(x.g.snapshot!);
   const d = decide(spec, snap.inputs);
-  const move = moveFor(d.pKeepBps, drawBps(secret, String(x.id)));
+  const move = moveFor(d.pKeepBps, drawBps(epochSecret('Otis', x.g.epoch), String(x.id)));
   ok(`game ${x.id}: decision replays from snapshot`, d.pKeepBps === snap.pKeepBps && move === x.g.character_move, `${move}`);
 }
 
@@ -77,6 +78,7 @@ await refused('second play is refused', () => call('play', { game_id: id4, playe
 await refused('wrong salt is refused', () => signerAccount(OTIS, process.env.OTIS_KEY).callFunctionRaw({ contractId: GAME, methodName: 'reveal', args: { game_id: id4, character_move: 'KEEP', salt: 'a'.repeat(64) } }), 'do not match');
 await refused('claim_timeout inside the window is refused', () => call('claim_timeout', { game_id: id4 }), 'still open');
 const r4 = await revealGame(id4); ids.push(id4);
+await new Promise((x) => setTimeout(x, 2000));
 ok(`game ${id4} settles after refusals`, (await view<GameView>('get_game', { game_id: id4 })).status === 'Settled', r4.move);
 await refused('reveal twice is refused', () => revealGame(id4), 'not waiting for a reveal');
 

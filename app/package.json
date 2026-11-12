@@ -7,9 +7,12 @@
     "dev": "next dev -p 3100",
     "build": "next build",
     "start": "next start -p 3100",
+    "e2e:characters": "node --env-file=../.env scripts/e2e-characters.ts",
     "e2e": "node --env-file=../.env scripts/e2e.ts",
     "test": "node --test \"test/*.test.ts\"",
     "play": "node --env-file=../.env scripts/play-once.ts",
+    "setup:characters": "node --env-file=../.env scripts/setup-characters.ts",
+    "epoch": "node --env-file=../.env scripts/epoch.ts",
     "setup": "node --env-file=../.env scripts/setup.ts"
   },
   "dependencies": {
