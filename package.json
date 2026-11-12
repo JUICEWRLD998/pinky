@@ -1,0 +1,13 @@
+{
+  "name": "pinky",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Keep it or break it: a promise game against characters that hold their own money, on NEAR.",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "test": "node --test test/",
+    "sim": "node sim/run.ts"
+  }
+}
