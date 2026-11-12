@@ -20,6 +20,18 @@ function secret(): string {
 }
 
 const key = () => process.env.OTIS_KEY;
+
+/** The player's transaction may reach our RPC node a moment after their own, so poll until the game has the status we need. */
+async function gameWhen(gameId: number, status: GameView['status'], tries = 20): Promise<GameView> {
+  let g: GameView | null = null;
+  for (let i = 0; i < tries; i++) {
+    g = await view<GameView | null>('get_game', { game_id: gameId });
+    if (g && g.status === status) return g;
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  if (!g) throw new Error('no such game');
+  return g;
+}
 const id = (n: number | string) => String(n);
 
 /** The facts the policy reads, built only from contract views so the audit can rebuild them. */
@@ -53,8 +65,7 @@ export interface SealResult { game_id: number; refused: boolean; tx: string; rea
 
 /** Seal Otis's move for a game that is waiting for it. Throws on anything else. */
 export async function sealGame(gameId: number): Promise<SealResult> {
-  const g = await view<GameView | null>('get_game', { game_id: gameId });
-  if (!g) throw new Error('no such game');
+  const g = await gameWhen(gameId, 'Opened');
   if (g.character !== OTIS) throw new Error('not an Otis game');
   if (g.status !== 'Opened') throw new Error(`game is ${g.status}, not waiting for a seal`);
   const inp = await inputsFor(g);
@@ -76,8 +87,7 @@ export interface RevealResult { game_id: number; move: Move; tx: string }
 
 /** Reveal Otis's move once the player has played. The move is whichever one matches the on-chain commit. */
 export async function revealGame(gameId: number): Promise<RevealResult> {
-  const g = await view<GameView | null>('get_game', { game_id: gameId });
-  if (!g) throw new Error('no such game');
+  const g = await gameWhen(gameId, 'Played');
   if (g.character !== OTIS) throw new Error('not an Otis game');
   if (g.status !== 'Played' || !g.commit) throw new Error(`game is ${g.status}, not waiting for a reveal`);
   const salt = saltFor(secret(), id(gameId));
