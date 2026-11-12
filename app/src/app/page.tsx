@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import s from './page.module.css';
-import { EXPLORER, OTIS, askReveal, askSeal, balanceOf, createGuest, loadGuest, near, openGame, playMove, viewGame, type Game, type Guest, type Move } from '../lib/client';
+import { EXPLORER, OTIS, forgetGame, loadGame, rememberGame, askReveal, askSeal, balanceOf, createGuest, loadGuest, near, openGame, playMove, viewGame, viewGameWhen, type Game, type Guest, type Move } from '../lib/client';
 
 type Phase = 'idle' | 'working' | 'sealed' | 'done';
 interface Txs { open?: string; seal?: string; play?: string; reveal?: string }
@@ -26,7 +26,12 @@ export default function Home() {
   const [err, setErr] = useState<string>('');
   const [said, setSaid] = useState<string>('Sit down. Ten cents on the table, and we both say what we will do.');
 
-  useEffect(() => { setGuest(loadGuest()); }, []);
+  useEffect(() => {
+    const g = loadGuest(); setGuest(g);
+    const open = loadGame();
+    if (g && open) carry(open, g);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => { if (guest) balanceOf(guest.accountId).then(setBal).catch(() => {}); }, [guest, phase]);
 
   async function run<T>(label: string, f: () => Promise<T>): Promise<T | undefined> {
@@ -34,24 +39,48 @@ export default function Home() {
     try { return await f(); } catch (e) { setErr((e as Error).message); setPhase('idle'); return undefined; } finally { setMsg(''); }
   }
 
+  /** Carry a game forward from wherever it stopped: used on first sit, after an error and after a reload. */
+  async function carry(id: number, g: Guest) {
+    setGameId(id); setPhase('working');
+    const cur = await run('Checking the table…', () => viewGame(id));
+    if (!cur) return;
+    if (cur.status === 'Opened') {
+      const sealed = await run('Otis is choosing…', () => askSeal(id));
+      if (!sealed) return;
+      setTxs((t) => ({ ...t, seal: sealed.tx }));
+      if (sealed.refused) { setSaid(sealed.reason); setPhase('done'); return; }
+      await run('Waiting for the seal…', () => viewGameWhen(id, 'Sealed'));
+      return carry(id, g);
+    }
+    if (cur.status === 'Sealed') {
+      setSaid('I have made up my mind. It is sealed on the chain. Your move.');
+      setGame(cur); setPhase('sealed'); return;
+    }
+    if (cur.status === 'Played') {
+      const r = await run('Otis is revealing…', () => askReveal(id));
+      if (!r) return;
+      setTxs((t) => ({ ...t, reveal: r.tx }));
+      return carry(id, g);
+    }
+    setGame(cur); setPhase('done'); setSaid(cur.character_move === 'KEEP' ? 'A promise is a promise.' : 'Nothing personal. That is how it goes.');
+    forgetGame();
+  }
+
   async function sit() {
-    setPhase('working'); setGame(null); setTxs({});
+    setGame(null); setTxs({}); setPhase('working');
     let g = guest;
     if (!g) {
       const made = await run('Getting you a seat and some test chips…', createGuest);
       if (!made) return;
       g = made.guest; setGuest(g);
     }
+    const open = loadGame();
+    if (open) return carry(open, g);
     const opened = await run('Putting your stake on the table…', () => openGame(g!));
     if (!opened) return;
-    setGameId(opened.gameId); setTxs({ open: opened.tx });
-    const sealed = await run('Otis is choosing…', () => askSeal(opened.gameId));
-    if (!sealed) return;
-    setTxs((t) => ({ ...t, seal: sealed.tx }));
-    if (sealed.refused) { setSaid(sealed.reason); setPhase('done'); return; }
-    setSaid('I have made up my mind. It is sealed on the chain. Your move.');
-    setGame(await viewGame(opened.gameId));
-    setPhase('sealed');
+    rememberGame(opened.gameId);
+    setTxs({ open: opened.tx });
+    return carry(opened.gameId, g);
   }
 
   async function choose(move: Move) {
@@ -63,10 +92,10 @@ export default function Home() {
     const r = await run('Otis is revealing…', () => askReveal(gameId));
     if (!r) return;
     setTxs((t) => ({ ...t, reveal: r.tx }));
-    const final = await viewGame(gameId);
-    setGame(final);
-    setSaid(r.move === 'KEEP' ? 'A promise is a promise.' : 'Nothing personal. That is how it goes.');
-    setPhase('done');
+    const final = await run('Reading the result…', () => viewGameWhen(gameId, 'Settled'));
+    if (!final) return;
+    setGame(final); setSaid(r.move === 'KEEP' ? 'A promise is a promise.' : 'Nothing personal. That is how it goes.');
+    forgetGame(); setPhase('done');
   }
 
   return (

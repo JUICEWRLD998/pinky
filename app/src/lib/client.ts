@@ -45,6 +45,16 @@ const account = (g: Guest) => new Account(g.accountId, provider, KeyPairSigner.f
 export async function viewGame(id: number): Promise<Game | null> {
   return ((await provider.callFunction({ contractId: GAME, method: 'get_game', args: { game_id: id }, blockQuery: { finality: 'optimistic' } })) as unknown as Game | null) ?? null;
 }
+/** Poll until the game reaches a status: our RPC node can trail the node that took the last transaction. */
+export async function viewGameWhen(id: number, status: Game['status'], tries = 20): Promise<Game | null> {
+  let g: Game | null = null;
+  for (let i = 0; i < tries; i++) {
+    g = await viewGame(id);
+    if (g && g.status === status) return g;
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  return g;
+}
 export async function balanceOf(accountId: string): Promise<bigint> {
   const b = await provider.callFunction<string>({ contractId: GAME, method: 'get_balance', args: { account_id: accountId }, blockQuery: { finality: 'optimistic' } });
   return BigInt(b ?? '0');
@@ -65,3 +75,8 @@ export const near = (yocto: bigint | string): string => {
   const y = BigInt(yocto); const whole = y / 10n ** 24n; const frac = (y % 10n ** 24n) / 10n ** 20n; // 4 decimals
   return `${whole}.${frac.toString().padStart(4, '0')}`;
 };
+
+const GAME_KEY = 'pinky.game.v1';
+export const loadGame = (): number | null => { try { const v = localStorage.getItem(GAME_KEY); return v ? Number(v) : null; } catch { return null; } };
+export const rememberGame = (id: number) => { try { localStorage.setItem(GAME_KEY, String(id)); } catch { /* tab-only */ } };
+export const forgetGame = () => { try { localStorage.removeItem(GAME_KEY); } catch { /* ignore */ } };
