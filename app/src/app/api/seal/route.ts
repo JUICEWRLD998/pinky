@@ -1,4 +1,4 @@
-import { sealGame } from '../../../../server/otis.ts';
+import { sealGame } from '../../../../server/characters.ts';
 
 export const maxDuration = 60;
 

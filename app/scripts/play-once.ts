@@ -4,7 +4,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { KeyPair, getTransactionLastResult } from 'near-api-js';
 import { GAME, GUEST_GAS, OTIS, milli, signerAccount, view, type GameView, type Move } from '../server/chain.ts';
-import { revealGame, sealGame } from '../server/otis.ts';
+import { revealGame, sealGame } from '../server/characters.ts';
 import { usherGuest } from '../server/usher.ts';
 
 const move = (process.argv[2] ?? 'KEEP').toUpperCase() as Move;

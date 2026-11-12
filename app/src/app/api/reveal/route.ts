@@ -1,4 +1,4 @@
-import { revealGame } from '../../../../server/otis.ts';
+import { revealGame } from '../../../../server/characters.ts';
 
 export const maxDuration = 60;
 

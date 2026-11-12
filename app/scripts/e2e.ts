@@ -4,7 +4,8 @@ import { KeyPair, getTransactionLastResult } from 'near-api-js';
 import { CHARACTERS, decide, moveFor } from '../../core/policy.ts';
 import { drawBps } from '../../core/rng.ts';
 import { GAME, GUEST_GAS, OTIS, milli, signerAccount, view, type GameView, type Move } from '../server/chain.ts';
-import { revealGame, sealGame } from '../server/otis.ts';
+import { epochSecret } from '../server/characters.ts';
+import { revealGame, sealGame } from '../server/characters.ts';
 import { usherGuest } from '../server/usher.ts';
 
 let fails = 0;
@@ -23,7 +24,6 @@ const me = signerAccount(guest.account_id, kp.toString());
 const call = (method: string, args: object, gas = GUEST_GAS) => me.callFunctionRaw({ contractId: GAME, methodName: method, args, gas });
 const stake = milli(10);
 const spec = CHARACTERS.find((c) => c.name === 'Otis')!;
-const secret = process.env.OTIS_EPOCH_SECRET!;
 
 async function game(move: Move) {
   const o = await call('open_game', { character: OTIS, stake: stake.toString() });
@@ -51,7 +51,7 @@ ok('after our BREAK, Otis pKeep is 1000', snap3.pKeepBps === 1000, String(snap3.
 for (const x of [g1, g2, g3]) {
   const snap = JSON.parse(x.g.snapshot!);
   const d = decide(spec, snap.inputs);
-  const move = moveFor(d.pKeepBps, drawBps(secret, String(x.id)));
+  const move = moveFor(d.pKeepBps, drawBps(epochSecret('Otis', x.g.epoch), String(x.id)));
   ok(`game ${x.id}: decision replays from snapshot`, d.pKeepBps === snap.pKeepBps && move === x.g.character_move, `${move}`);
 }
 
