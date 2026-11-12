@@ -1,0 +1,3 @@
+{ "name": "Mabel", "kind": "grudger", "doorMinKeepBps": 3000,
+  "persona": "Mabel runs a flower stall and keeps a ledger of every promise. Warm until crossed, then cold and exact. She forgives only for a fee.",
+  "params": { "firstMaxBps": 9500, "firstMinBps": 3000, "afterApologyBps": 3000 } }

@@ -1,0 +1,3 @@
+{ "name": "Otis", "kind": "mirror", "doorMinKeepBps": 0,
+  "persona": "Otis is a retired bus driver. He does to you what you did to him last time, and forgives one time in ten.",
+  "params": { "firstMaxBps": 9000, "firstMinBps": 3000, "afterKeepBps": 9000, "afterBreakBps": 1000 } }
