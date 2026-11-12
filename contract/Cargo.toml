@@ -1,0 +1,25 @@
+[package]
+name = "pinky-contract"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Pinky: a promise game on NEAR. Ledger, sealed moves, Swear Jar, characters with their own balances."
+repository = "https://github.com/JUICEWRLD998/pinky"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+near-sdk = "5.30.1"
+
+[dev-dependencies]
+near-sdk = { version = "5.30.1", features = ["unit-testing"] }
+serde_json = "1"
+
+[profile.release]
+codegen-units = 1
+opt-level = "z"
+lto = true
+debug = false
+panic = "abort"
+overflow-checks = true

@@ -8,6 +8,7 @@
   "engines": { "node": ">=24" },
   "scripts": {
     "test": "node --test \"test/*.test.ts\"",
-    "sim": "node sim/run.ts"
+    "sim": "node sim/run.ts",
+    "vectors": "node scripts/vectors.ts"
   }
 }
