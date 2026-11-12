@@ -46,3 +46,17 @@ and 121.5.
 - **Mirror loses** about 20 to 35 percent. Tit-for-tat against characters that include two cheats is not free. This
   is a finding, not a goal.
 - The simulation archetypes are fixed rules, not people.
+
+## Phase 2: the contract (2026-11-12)
+
+- **The Rust payoff maths equals the TypeScript rules on 2,880 vectors.** `contract/tests/vectors.rs`, run with `cd contract && cargo test --test vectors`. The test has a planted control.
+- **Outcomes, timeouts, auth and epoch rules hold in the mock runtime.** 25 tests in `contract/tests/game.rs`. Every money test ends with a conservation check (balances + Jar + house + open stakes = total_held), and a planted control shows the checker fails on a forged yocto.
+- **The compiled wasm works in a sandbox with real transfers.** 4 tests in `integration/tests/sandbox.rs`: a full game, a withdraw that raises the account native balance, a wrong salt that fails and changes nothing, a timeout claim after the window.
+- **Deployed on testnet.** `pinky.fad-pilot1.testnet`, deploy tx `FZnu9zM4Rm3jm8cAoqYcZ6FUk6gLX7LK23bdoHu8NQsQ`, `get_config` returns the frozen parameters, `mabel.fad-pilot1.testnet` is registered (tx `2S6FmSrbpuTUSDj6vFQLESkE3sHUnHMS1FvMtdcRdUw6`).
+
+### Known gaps (contract)
+
+- `back`, `unback` and `enter_agent` are not built; they move to Phase 5 with the league.
+- The deployed wasm was built non-reproducibly on the author machine. The sha256 is recorded; a reproducible build is not claimed.
+- No testnet game has been played yet; the on-chain game is the Phase 3 gate.
+- A player can have at most 3 open games and a character can only open games its balance covers; these are anti-spam limits, not fairness proofs.
