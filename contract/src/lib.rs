@@ -13,6 +13,11 @@ use payoff::{Move, Params, Settlement};
 const NS: u64 = 1_000_000_000;
 const MAX_SNAPSHOT: usize = 1500;
 const MAX_ACTIVE_PER_PLAYER: u32 = 3;
+/// Backing shares are counted in units of 1e12 yocto so every product fits in u128. Dust stays in the pool.
+const UNIT: u128 = 1_000_000_000_000;
+/// An agent must come with at least this many minimum stakes of bankroll.
+const AGENT_MIN_STAKES: u128 = 5;
+const MAX_POLICY: usize = 400;
 
 #[near(serializers = [borsh])]
 #[derive(BorshStorageKey)]
@@ -23,6 +28,8 @@ enum Key {
     Records,
     Pairs,
     EpochSecrets,
+    Pools,
+    Holdings,
 }
 
 /// Parameters frozen at deploy.
@@ -112,6 +119,8 @@ pub struct Character {
     pub open_games: u32,
     pub games: u64,
     pub keeps: u64,
+    /// Policy weights (JSON) for an agent entered by an outside party. None for the built-in characters.
+    pub policy: Option<String>,
 }
 
 #[near(serializers = [json, borsh])]
@@ -131,6 +140,33 @@ pub struct Pair {
     pub player_breaks: u64,
     pub last_player_move: Option<Move>,
     pub last_character_move: Option<Move>,
+    /// The player paid the apology fee to this character: a closed door reopens.
+    pub apology_paid: bool,
+}
+
+/// Backing pool of one character. Shares are counted in units of 1e12 yocto of the character ledger balance.
+#[near(serializers = [json, borsh])]
+#[derive(Clone, Default)]
+pub struct Pool {
+    pub total_shares: U128,
+    /// Bumped when the character goes broke: shares of an older epoch are worth nothing.
+    pub epoch: u32,
+}
+
+#[near(serializers = [json, borsh])]
+#[derive(Clone, Default)]
+pub struct Holding {
+    pub epoch: u32,
+    pub shares: U128,
+}
+
+#[near(serializers = [json])]
+pub struct PoolView {
+    pub total_shares: U128,
+    pub epoch: u32,
+    pub balance: U128,
+    /// What 1e12 shares redeem for now, in yocto.
+    pub value_per_unit: U128,
 }
 
 #[near(contract_state)]
@@ -144,6 +180,8 @@ pub struct Pinky {
     records: LookupMap<AccountId, Record>,
     pairs: LookupMap<String, Pair>,
     epoch_secrets: LookupMap<String, String>,
+    pools: LookupMap<AccountId, Pool>,
+    holdings: LookupMap<String, Holding>,
     jar: u128,
     house_balance: u128,
     /// Every yocto the contract owes: ledger balances, escrowed stakes, the Jar and the house balance.
@@ -168,6 +206,10 @@ fn from_hex64(s: &str) -> Vec<u8> {
     require!(is_hex64(s), "expected 64 lowercase hex characters");
     let val = |b: u8| if b <= b'9' { b - b'0' } else { b - b'a' + 10 };
     s.as_bytes().chunks(2).map(|c| (val(c[0]) << 4) | val(c[1])).collect()
+}
+
+fn holding_key(character: &AccountId, backer: &AccountId) -> String {
+    format!("{}|{}", character, backer)
 }
 
 fn pair_key(player: &AccountId, character: &AccountId) -> String {
@@ -198,6 +240,14 @@ pub enum Event {
     EpochRevealed { character: String, epoch: u32 },
     #[event_version("1.0.0")]
     HouseClaimed { amount: String },
+    #[event_version("1.0.0")]
+    ApologyPaid { player: String, character: String, fee: String },
+    #[event_version("1.0.0")]
+    Backed { backer: String, character: String, amount: String, shares: String },
+    #[event_version("1.0.0")]
+    Unbacked { backer: String, character: String, amount: String, shares: String },
+    #[event_version("1.0.0")]
+    AgentEntered { agent: String, persona_hash: String, bankroll: String },
 }
 
 #[near(serializers = [json])]
@@ -237,6 +287,8 @@ impl Pinky {
             records: LookupMap::new(Key::Records),
             pairs: LookupMap::new(Key::Pairs),
             epoch_secrets: LookupMap::new(Key::EpochSecrets),
+            pools: LookupMap::new(Key::Pools),
+            holdings: LookupMap::new(Key::Holdings),
             jar: 0,
             house_balance: 0,
             total_held: 0,
@@ -301,7 +353,7 @@ impl Pinky {
         require!(!persona_hash.is_empty() && persona_hash.len() <= 128, "persona_hash must be 1..128 bytes");
         self.characters.insert(
             who.clone(),
-            Character { persona_hash: persona_hash.clone(), registered_ns: env::block_timestamp(), epoch: 0, epoch_commit: None, epoch_open: false, open_games: 0, games: 0, keeps: 0 },
+            Character { persona_hash: persona_hash.clone(), registered_ns: env::block_timestamp(), epoch: 0, epoch_commit: None, epoch_open: false, open_games: 0, games: 0, keeps: 0, policy: None },
         );
         Event::CharacterRegistered { character: who.to_string(), persona_hash }.emit();
     }
@@ -344,6 +396,114 @@ impl Pinky {
         self.set_bal(&who, bal - amount.0);
         self.house_balance += amount.0;
         Event::InferencePaid { character: who.to_string(), amount: amount.0.to_string(), memo }.emit();
+    }
+
+    /// An outside party enters an agent: it registers as a character with a policy, a bankroll and an open epoch in one call.
+    #[payable]
+    pub fn enter_agent(&mut self, persona_hash: String, policy: String, epoch_commit: String) {
+        let who = env::predecessor_account_id();
+        require!(!self.characters.contains_key(&who), "already registered");
+        require!(!persona_hash.is_empty() && persona_hash.len() <= 128, "persona_hash must be 1..128 bytes");
+        require!(!policy.is_empty() && policy.len() <= MAX_POLICY, "policy must be 1..400 bytes of JSON");
+        require!(is_hex64(&epoch_commit), "epoch_commit must be 64 lowercase hex characters");
+        let amount = env::attached_deposit().as_yoctonear();
+        require!(amount >= AGENT_MIN_STAKES * self.config.min_stake.0, "bankroll below 5 minimum stakes");
+        self.credit_deposit(who.clone());
+        self.characters.insert(
+            who.clone(),
+            Character { persona_hash: persona_hash.clone(), registered_ns: env::block_timestamp(), epoch: 1, epoch_commit: Some(epoch_commit.clone()), epoch_open: true, open_games: 0, games: 0, keeps: 0, policy: Some(policy) },
+        );
+        Event::CharacterRegistered { character: who.to_string(), persona_hash: persona_hash.clone() }.emit();
+        Event::EpochCommitted { character: who.to_string(), epoch: 1, commit: epoch_commit }.emit();
+        Event::AgentEntered { agent: who.to_string(), persona_hash, bankroll: amount.to_string() }.emit();
+    }
+
+    // ---------- apology and backing ----------
+
+    /// The player pays an apology fee (2 minimum stakes) into the Swear Jar. That character door reopens for this player.
+    pub fn apologize(&mut self, character: AccountId) {
+        let player = env::predecessor_account_id();
+        require!(self.characters.contains_key(&character), "unknown character");
+        require!(player != character, "cannot apologize to yourself");
+        let key = pair_key(&player, &character);
+        let mut pair = self.pairs.get(&key).cloned().unwrap_or_default();
+        require!(!pair.apology_paid, "already apologized");
+        let fee = 2 * self.config.min_stake.0;
+        let pb = self.bal(&player);
+        require!(pb >= fee, "insufficient ledger balance for the apology fee");
+        self.set_bal(&player, pb - fee);
+        self.jar += fee;
+        pair.apology_paid = true;
+        self.pairs.insert(key, pair);
+        Event::ApologyPaid { player: player.to_string(), character: character.to_string(), fee: fee.to_string() }.emit();
+    }
+
+    /// Back a character: move ledger money into its bankroll and receive shares of it at the current price.
+    pub fn back(&mut self, character: AccountId, amount: U128) {
+        let backer = env::predecessor_account_id();
+        require!(backer != character, "a character adds to its own bankroll with deposit");
+        let c = self.characters.get(&character).unwrap_or_else(|| env::panic_str("unknown character"));
+        require!(c.open_games == 0, "character has games in play");
+        require!(amount.0 >= self.config.min_stake.0, "below the minimum stake");
+        let amount_u = amount.0 / UNIT;
+        require!(amount_u > 0, "amount too small");
+        let pb = self.bal(&backer);
+        require!(pb >= amount.0, "insufficient ledger balance");
+        let cb = self.bal(&character);
+        let cb_u = cb / UNIT;
+        let mut pool = self.pools.get(&character).cloned().unwrap_or_default();
+        if pool.total_shares.0 == 0 && cb_u > 0 {
+            // First backer: the character own balance becomes its owner shares, so the price starts at one share per unit.
+            self.holdings.insert(holding_key(&character, &character), Holding { epoch: pool.epoch, shares: U128(cb_u) });
+            pool.total_shares = U128(cb_u);
+        }
+        if cb_u == 0 && pool.total_shares.0 > 0 {
+            // Broke: older shares are worth nothing. A new epoch starts the pool again.
+            pool.epoch += 1;
+            pool.total_shares = U128(0);
+        }
+        let out = if pool.total_shares.0 == 0 {
+            amount_u
+        } else {
+            amount_u.checked_mul(pool.total_shares.0).unwrap_or_else(|| env::panic_str("overflow")) / cb_u
+        };
+        require!(out > 0, "amount buys no shares");
+        self.set_bal(&backer, pb - amount.0);
+        self.set_bal(&character, cb + amount.0);
+        pool.total_shares = U128(pool.total_shares.0 + out);
+        let hk = holding_key(&character, &backer);
+        let mut h = self.holdings.get(&hk).cloned().unwrap_or_default();
+        if h.epoch != pool.epoch {
+            h = Holding { epoch: pool.epoch, shares: U128(0) };
+        }
+        h.shares = U128(h.shares.0 + out);
+        self.holdings.insert(hk, h);
+        self.pools.insert(character.clone(), pool);
+        Event::Backed { backer: backer.to_string(), character: character.to_string(), amount: amount.0.to_string(), shares: out.to_string() }.emit();
+    }
+
+    /// Redeem shares for their share of the character bankroll, back into the backer ledger balance.
+    pub fn unback(&mut self, character: AccountId, shares: U128) {
+        let backer = env::predecessor_account_id();
+        require!(shares.0 > 0, "shares must be positive");
+        let c = self.characters.get(&character).unwrap_or_else(|| env::panic_str("unknown character"));
+        require!(c.open_games == 0, "character has games in play");
+        let mut pool = self.pools.get(&character).cloned().unwrap_or_else(|| env::panic_str("no pool"));
+        let hk = holding_key(&character, &backer);
+        let mut h = self.holdings.get(&hk).cloned().unwrap_or_default();
+        require!(h.epoch == pool.epoch && h.shares.0 >= shares.0, "not enough shares");
+        let cb = self.bal(&character);
+        let value_u = shares.0.checked_mul(cb / UNIT).unwrap_or_else(|| env::panic_str("overflow")) / pool.total_shares.0;
+        let amount = value_u * UNIT;
+        require!(amount > 0 && amount <= cb, "shares redeem for nothing");
+        self.set_bal(&character, cb - amount);
+        let pb = self.bal(&backer);
+        self.set_bal(&backer, pb + amount);
+        h.shares = U128(h.shares.0 - shares.0);
+        pool.total_shares = U128(pool.total_shares.0 - shares.0);
+        self.holdings.insert(hk, h);
+        self.pools.insert(character.clone(), pool);
+        Event::Unbacked { backer: backer.to_string(), character: character.to_string(), amount: amount.to_string(), shares: shares.0.to_string() }.emit();
     }
 
     // ---------- the game ----------
@@ -515,6 +675,17 @@ impl Pinky {
     }
     pub fn get_epoch_secret(&self, character: AccountId, epoch: u32) -> Option<String> {
         self.epoch_secrets.get(&format!("{}|{}", character, epoch)).cloned()
+    }
+    pub fn get_pool(&self, character: AccountId) -> PoolView {
+        let pool = self.pools.get(&character).cloned().unwrap_or_default();
+        let bal = self.bal(&character);
+        let value = if pool.total_shares.0 == 0 { UNIT } else { UNIT * (bal / UNIT) / pool.total_shares.0 };
+        PoolView { total_shares: pool.total_shares, epoch: pool.epoch, balance: U128(bal), value_per_unit: U128(value) }
+    }
+    pub fn get_shares(&self, character: AccountId, backer: AccountId) -> U128 {
+        let pool = self.pools.get(&character).cloned().unwrap_or_default();
+        let h = self.holdings.get(&holding_key(&character, &backer)).cloned().unwrap_or_default();
+        if h.epoch == pool.epoch { h.shares } else { U128(0) }
     }
     pub fn solvency(&self) -> Solvency {
         Solvency {
