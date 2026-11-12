@@ -75,3 +75,18 @@ and 121.5.
 
 Known gaps: five-person playtest not done (no testers; "do people start a second game unprompted" is unmeasured); stranger-break rate is a fixed 2000 bps until Phase 4 measures it; the limiter is
 in memory and per process; the usher funds guests from one testnet account that needs faucet top-ups.
+
+## Phase 4 (characters that talk, pay and can be audited)
+
+| Claim | Evidence |
+|---|---|
+| Six characters are live funded accounts that can play | `docs/receipts/e2e-characters.txt` (`npm --prefix app run e2e:characters`) |
+| Each reply is paid for by the character on chain, exactly the metered cost | same file: "ledger fell by exactly the metered cost" per character; `pay_inference` txs; `core/inference.ts`, `test/inference.test.ts` |
+| The model never decides a move | `app/server/characters.ts` (move = policy + epoch-secret draw); `app/server/talk.ts` returns a line and a bounded read only |
+| A player cannot forge the chat read | `core/inference.ts` signRead/verifyRead; `app/src/app/api/seal/route.ts`; tests |
+| An audit of a finished epoch passes and tampering fails | `docs/receipts/audit-epoch1.txt` (17 PASS, 0 FAIL, 3 SKIP); `test/audit.test.ts` planted controls |
+| A reply has a verifiable TEE signature | chat id in the `pay_inference` memo; `GET /v1/signature/<id>` returned a `provider_tee` ECDSA signature on 2026-11-12 |
+
+Known gaps: the audit cannot recompute pair history, record, stranger-break rate or the chat read (attested, bounded); refusals do not record
+bankroll/Jar facts on chain; the USD-to-NEAR rate is a fixed demo constant; the model call and signature need a NEAR AI key; Mabel's seed phrase for
+the Phase 0 account was printed once in a session log (testnet, no value).

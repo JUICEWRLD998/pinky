@@ -2,7 +2,7 @@
 
 Keep it or break it. A promise game against characters that hold their own money, remember what you did, and pay for their own thinking. Built for NEAR HACKATHON, track: Games With Real Economies.
 
-**Status: Phase 3 of 9 (thin path: one character, scripted lines, plain UI, real chain).** There is no talking character, league or audit yet, and this README claims none. Each phase is merged to `main` only when its gate passes.
+**Status: Phase 4 of 9 (six characters that talk, pay for their own replies and can be audited).** There is no league, backing or polished interface yet, and this README claims none.
 
 ## What it will be
 
@@ -52,6 +52,31 @@ npm run build && npm start   # the web table on http://localhost:3100
 A guest account holds only a function-call key for `open_game`, `play`, `withdraw`, `claim_timeout`. The server seals and reveals
 Otis's move; the move comes from his public policy and a draw from his epoch secret. Receipts: `docs/receipts/`.
 
+## Characters, payments and the audit (Phase 4)
+
+All six characters (Mabel, Otis, Fenn, Prue, Dice, Abacus) are funded NEAR sub-accounts, registered on the contract with an open epoch.
+
+- **Talk:** `POST /api/talk` sends the player's line to NEAR AI Cloud (`Qwen/Qwen3.8-27B`, non-thinking). The model returns one in-character line and a
+  read of the message (promise, threat, sincerity). The read can move the chance of keeping by at most 10 points and the server signs it for that one game.
+  The model never sees or picks a move.
+- **Paid on chain:** after each reply the character calls `pay_inference` on the contract: the metered USD cost converted at a fixed 3 USD per NEAR
+  (demo rate, `core/inference.ts`) moves from the character's ledger balance to the house. The memo holds the model and the chat id, so the reply's
+  TEE signature is fetchable: `GET https://cloud-api.near.ai/v1/signature/<chat_id>?model=Qwen/Qwen3.8-27B&signing_algo=ecdsa`.
+  Below a 0.05 NEAR ledger balance a character goes quiet (canned lines, nothing paid).
+- **Epochs:** `npm --prefix app run epoch` settles overdue games, reveals the finished epoch secret and commits the next one (secrets are
+  HMAC(master, name|epoch), so no storage).
+- **Audit (no keys needed):**
+
+```
+npm run audit -- --epoch 1
+```
+
+Expected: per game `PASS`, `FAIL` or `SKIP` (timeouts have no sealed move) and a last line like `epoch 1: 17 PASS, 0 FAIL, 3 SKIP`. Saved run: `docs/receipts/audit-epoch1.txt`.
+It recomputes from chain data: the policy decision, the private draw, the commit, the stake share and the Jar rate. It cannot recompute pair history, the
+player record, the stranger-break rate or the chat read (the character attests those, bounded by policy). Tampered fixtures print FAIL (`npm test`).
+
+Live checks (testnet, need the server keys): `npm --prefix app run e2e` and `npm --prefix app run e2e:characters`.
+
 ## Where things are
 
 | Path | What |
@@ -63,13 +88,14 @@ Otis's move; the move comes from his public policy and a draw from his epoch sec
 | `sim/` | Seeded economy simulation, runner and chart |
 | `contract/` | Rust contract, payoff module, golden-vector and game tests |
 | `integration/` | Sandbox tests on the compiled wasm |
-| `app/` | Next.js table, API routes (usher, seal, reveal), server logic, setup and play scripts |
+| `app/` | Next.js table, API routes (usher, talk, seal, reveal), server logic, setup, epoch, audit and e2e scripts |
+| `core/inference.ts`, `core/audit.ts` | Metered cost, bounded chat read, signed read; the pure game audit |
 | `CLAIMS.md` | Every claim with the file or command behind it, and the known gaps |
 | `DECISIONS.md` | Dated design decisions |
 
 ## What is not done
 
-Five-person playtest, characters that talk, audit command, league, hosted demo. See `CLAIMS.md` for the gaps in the
+Five-person playtest (waived), league, backing, interface polish, audit command, league, hosted demo. See `CLAIMS.md` for the gaps in the
 simulation numbers (backing cost is high, apology fees were never exercised by the simulation).
 
 ## Licence

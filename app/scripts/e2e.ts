@@ -31,7 +31,8 @@ async function game(move: Move) {
   const s = await sealGame(id);
   await call('play', { game_id: id, player_move: move });
   const r = await revealGame(id);
-  const g = await view<GameView>('get_game', { game_id: id });
+  let g = await view<GameView>('get_game', { game_id: id });
+  for (let i = 0; i < 20 && g.status !== 'Settled'; i++) { await new Promise((x) => setTimeout(x, 500)); g = await view<GameView>('get_game', { game_id: id }); }
   return { id, g, s, r };
 }
 
@@ -77,6 +78,7 @@ await refused('second play is refused', () => call('play', { game_id: id4, playe
 await refused('wrong salt is refused', () => signerAccount(OTIS, process.env.OTIS_KEY).callFunctionRaw({ contractId: GAME, methodName: 'reveal', args: { game_id: id4, character_move: 'KEEP', salt: 'a'.repeat(64) } }), 'do not match');
 await refused('claim_timeout inside the window is refused', () => call('claim_timeout', { game_id: id4 }), 'still open');
 const r4 = await revealGame(id4); ids.push(id4);
+await new Promise((x) => setTimeout(x, 2000));
 ok(`game ${id4} settles after refusals`, (await view<GameView>('get_game', { game_id: id4 })).status === 'Settled', r4.move);
 await refused('reveal twice is refused', () => revealGame(id4), 'not waiting for a reveal');
 

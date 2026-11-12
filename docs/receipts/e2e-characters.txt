@@ -1,0 +1,40 @@
+PASS  Mabel: replies with a line  A promise is just ink until it bleeds. I'll hold your stake,
+PASS  Mabel: read is signed for this game only
+PASS  Mabel: ledger fell by exactly the metered cost  28660000000000000000 yocto, tx EBt4AbEA
+PASS  Mabel: memo names model and chat id
+PASS  Mabel: game settles  both_keep, Mabel played KEEP
+PASS  Mabel: snapshot carries the signed read
+PASS  Otis: replies with a line  Hmph. Same smooth talk as last time. I'll see how you squirm
+PASS  Otis: read is signed for this game only
+PASS  Otis: ledger fell by exactly the metered cost  28170000000000000000 yocto, tx Gb1vZJfD
+PASS  Otis: memo names model and chat id
+PASS  Otis: game settles  both_keep, Otis played KEEP
+PASS  Otis: snapshot carries the signed read
+PASS  Fenn: replies with a line  Your word is smooth, but my jar is getting light. Smile wide
+PASS  Fenn: read is signed for this game only
+PASS  Fenn: ledger fell by exactly the metered cost  29056666666666666667 yocto, tx 6RoUynMS
+PASS  Fenn: memo names model and chat id
+PASS  Fenn: game settles  character_breaks, Fenn played BREAK
+PASS  Fenn: snapshot carries the signed read
+PASS  Prue: replies with a line  A steady hand is a rare thing, dear. I trust you to stand by
+PASS  Prue: read is signed for this game only
+PASS  Prue: ledger fell by exactly the metered cost  26290000000000000000 yocto, tx BQ3svBHV
+PASS  Prue: memo names model and chat id
+PASS  Prue: game settles  both_keep, Prue played KEEP
+PASS  Prue: snapshot carries the signed read
+PASS  Dice: replies with a line  Flipping a coin. It landed heads, so I say: Your promise sou
+PASS  Dice: read is signed for this game only
+PASS  Dice: ledger fell by exactly the metered cost  32523333333333333334 yocto, tx FZZKavnn
+PASS  Dice: memo names model and chat id
+PASS  Dice: game settles  both_keep, Dice played KEEP
+PASS  Dice: snapshot carries the signed read
+PASS  Abacus: replies with a line  Noted. I'll trust that your promise outweighs the temptation
+PASS  Abacus: read is signed for this game only
+PASS  Abacus: ledger fell by exactly the metered cost  25403333333333333334 yocto, tx FHxefGQe
+PASS  Abacus: memo names model and chat id
+PASS  Abacus: game settles  character_breaks, Abacus played BREAK
+PASS  Abacus: snapshot carries the signed read
+PASS  house balance rose by at least what characters paid (rake adds more)  paid 170103333333333333335, rose 970103333333333333335
+PASS  contract still solvent
+
+ALL PASS

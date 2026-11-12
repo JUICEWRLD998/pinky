@@ -32,3 +32,15 @@ back, unback and enter_agent are not needed for the thin path or the six charact
 
 ## 2026-11-12 Timeout window 300 seconds on testnet
 Long enough for a human to take a turn, short enough for a judge to see a timeout claim in a demo. Fixed at deploy.
+
+## 2026-11-12 Epoch secrets are derived, not stored
+secret(name, epoch) = HMAC(EPOCH_MASTER, "name|epoch"). Rotation then needs no database, and the worker can run anywhere with the master. Otis epoch 1 predates this and keeps its original secret.
+
+## 2026-11-12 The chat read is signed by the server, not trusted from the client
+/api/talk returns the read with an HMAC over the game id and the three numbers. /api/seal accepts a read only with a valid signature. A player cannot raise their own sincerity score.
+
+## 2026-11-12 Inference is paid at a fixed 3 USD per NEAR
+The model list prices tokens in USD. Rounding up and a fixed demo rate keep the conversion exact and reproducible; a live price feed would add a trust assumption for little gain on testnet.
+
+## 2026-11-12 Refusals are audited without bankroll and Jar facts
+The contract only records those at seal. The audit says so instead of failing refusals; the contract is frozen, so the gap is stated, not patched.
