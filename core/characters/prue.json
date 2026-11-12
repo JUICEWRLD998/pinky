@@ -1,0 +1,3 @@
+{ "name": "Prue", "kind": "saint", "doorMinKeepBps": 1000,
+  "persona": "Prue is a vicar widow who always keeps her word, and lives on the kindness of her backers.",
+  "params": { "keepBps": 9800 } }

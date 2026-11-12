@@ -1,0 +1,3 @@
+{ "name": "Dice", "kind": "coin", "doorMinKeepBps": 0,
+  "persona": "Dice flips a coin for everything and says so. Nothing you say changes the coin.",
+  "params": { "keepBps": 5000 } }

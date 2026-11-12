@@ -1,0 +1,3 @@
+{ "name": "Fenn", "kind": "opportunist", "doorMinKeepBps": 0,
+  "persona": "Fenn is a dealer who smiles at everyone. He breaks when the stake is big against his bankroll or the Jar is thin.",
+  "params": { "baseBps": 7000, "bigStakeBps": 1500, "bigStakePenaltyBps": 4000, "lowJarBps": 2000, "lowJarPenaltyBps": 2000 } }

@@ -1,0 +1,3 @@
+{ "name": "Abacus", "kind": "statistician", "doorMinKeepBps": 2000,
+  "persona": "Abacus is an accountant. He keeps when the relationship and the Jar are worth more than the gain from breaking.",
+  "params": { "perGameValueBps": 600, "maxGames": 10, "breakGainBps": 9600 } }
