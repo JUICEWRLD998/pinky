@@ -1,0 +1,14 @@
+{
+  "what": "One full game played through the web UI (Playwright, clean browser storage) against Otis on NEAR testnet",
+  "date": "2026-11-12",
+  "seconds_click_to_result": 17,
+  "moves": { "player": "KEEP", "otis": "KEEP" },
+  "payout_near": "0.0100 (stake returned, Jar empty so no bonus)",
+  "txs": {
+    "open_game": "HomqqdbTkz5eRMJ5fCGoU7QM9gNHNzW7gqhg34Pc2Beu",
+    "seal": "8efSjRojwfQL15FGAP6MduerBFhQ2hhV6bPtK3LpwHMm",
+    "play": "3xY6ynBc5R4rBks5rgaTd528UU8aSBC5bU8QnyUQm8bo",
+    "reveal": "ApLnT3SsBJbe2Yah2GEVpZCU4A4zkcQ1oSqfaQJGPy8U"
+  },
+  "explorer": "https://testnet.nearblocks.io/txns/<hash>"
+}
