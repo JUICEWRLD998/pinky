@@ -17,7 +17,7 @@ export function signerAccount(accountId: string, privateKey: string | undefined)
 
 /** View call at the optimistic head: the seal and reveal steps must see the player's call the moment it lands. */
 export async function view<T>(method: string, args: Record<string, unknown> = {}): Promise<T> {
-  return (await provider.callFunction<T>({ contractId: GAME, method, args, blockQuery: { finality: 'optimistic' } })) as T;
+  return (await provider.callFunction({ contractId: GAME, method, args, blockQuery: { finality: 'optimistic' } })) as unknown as T;
 }
 
 /** Gas for a guest call. The function-call key pays from a small balance, so never the 300 Tgas default. */
