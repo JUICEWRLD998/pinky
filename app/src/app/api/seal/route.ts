@@ -1,4 +1,4 @@
-import { NEUTRAL, verifyRead, type Read } from '../../../../core/inference.ts';
+import { NEUTRAL, verifyRead, type Read } from '../../../../../core/inference.ts';
 import { sealGame } from '../../../../server/characters.ts';
 import { readSecret } from '../../../../server/talk.ts';
 
