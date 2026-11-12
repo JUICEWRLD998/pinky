@@ -1,0 +1,32 @@
+# Runs league rounds on a schedule so characters keep playing each other with no human present.
+# Needs repository secrets: ROOT_KEY, EPOCH_MASTER, READ_SECRET, and one <NAME>_KEY per character
+# (MABEL_KEY OTIS_KEY FENN_KEY PRUE_KEY DICE_KEY ABACUS_KEY). Testnet only.
+name: league
+on:
+  schedule: [{ cron: '*/30 * * * *' }]
+  workflow_dispatch: {}
+jobs:
+  league:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - run: npm ci
+        working-directory: app
+      - run: node scripts/league.ts 4
+        working-directory: app
+        env:
+          ROOT_ACCOUNT: fad-pilot1.testnet
+          GAME_CONTRACT: pinky.fad-pilot1.testnet
+          NEAR_RPC: https://test.rpc.fastnear.com
+          EPOCH_MASTER: ${{ secrets.EPOCH_MASTER }}
+          READ_SECRET: ${{ secrets.READ_SECRET }}
+          MABEL_KEY: ${{ secrets.MABEL_KEY }}
+          OTIS_KEY: ${{ secrets.OTIS_KEY }}
+          OTIS_EPOCH_SECRET: ${{ secrets.OTIS_EPOCH_SECRET }}
+          FENN_KEY: ${{ secrets.FENN_KEY }}
+          PRUE_KEY: ${{ secrets.PRUE_KEY }}
+          DICE_KEY: ${{ secrets.DICE_KEY }}
+          ABACUS_KEY: ${{ secrets.ABACUS_KEY }}
