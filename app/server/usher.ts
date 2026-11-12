@@ -8,7 +8,7 @@ import { GAME, GUESTS, milli, signerAccount } from './chain.ts';
 /** Methods a guest key may call on the game contract. Nothing else, and never the usher or Otis methods. */
 export const GUEST_METHODS = ['open_game', 'play', 'withdraw', 'claim_timeout'];
 /** NEAR left in the guest account for gas, and the key allowance cap. */
-export const GAS_FUND = milli(20);
+export const GAS_FUND = milli(30);
 export const ALLOWANCE = milli(100);
 /** Test chips credited to the game ledger. */
 export const CHIPS = milli(50);
@@ -25,7 +25,7 @@ export async function usherGuest(publicKey: string): Promise<Usher> {
     actions: [
       actions.createAccount(),
       actions.transfer(GAS_FUND),
-      actions.addKey(pk, actions.functionCallAccessKey(GAME, GUEST_METHODS, ALLOWANCE)),
+      actions.addFunctionCallAccessKey(pk, GAME, GUEST_METHODS, ALLOWANCE),
     ],
   });
   const dep = await usher.callFunctionRaw({ contractId: GAME, methodName: 'deposit_for', args: { account_id }, deposit: CHIPS });

@@ -2,8 +2,8 @@
 // guest account, the four calls. Saves the four transaction hashes as a receipt.
 // Run from app/:  node --env-file=../.env scripts/play-once.ts [KEEP|BREAK]
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { KeyPair } from 'near-api-js';
-import { GAME, OTIS, milli, signerAccount, view, type GameView, type Move } from '../server/chain.ts';
+import { KeyPair, getTransactionLastResult } from 'near-api-js';
+import { GAME, GUEST_GAS, OTIS, milli, signerAccount, view, type GameView, type Move } from '../server/chain.ts';
 import { revealGame, sealGame } from '../server/otis.ts';
 import { usherGuest } from '../server/usher.ts';
 
@@ -19,15 +19,15 @@ lap(`guest ${guest.account_id} created and funded`);
 const me = signerAccount(guest.account_id, kp.toString());
 
 const stake = milli(10);
-const opened = await me.callFunctionRaw({ contractId: GAME, methodName: 'open_game', args: { character: OTIS, stake: stake.toString() } });
-const gameId = Number(await view<number>('get_next_game_id')) - 1;
+const opened = await me.callFunctionRaw({ contractId: GAME, methodName: 'open_game', args: { character: OTIS, stake: stake.toString() }, gas: GUEST_GAS });
+const gameId = Number(getTransactionLastResult(opened));
 lap(`open_game tx ${opened.transaction.hash} (game ${gameId})`);
 
 const sealed = await sealGame(gameId);
 lap(`seal tx ${sealed.tx}${sealed.refused ? ' (REFUSED)' : ''}`);
 if (sealed.refused) throw new Error('Otis refused a stranger: ' + sealed.reason);
 
-const played = await me.callFunctionRaw({ contractId: GAME, methodName: 'play', args: { game_id: gameId, player_move: move } });
+const played = await me.callFunctionRaw({ contractId: GAME, methodName: 'play', args: { game_id: gameId, player_move: move }, gas: GUEST_GAS });
 lap(`play ${move} tx ${played.transaction.hash}`);
 
 const revealed = await revealGame(gameId);

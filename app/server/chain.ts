@@ -15,11 +15,13 @@ export function signerAccount(accountId: string, privateKey: string | undefined)
   return new Account(accountId, provider, KeyPairSigner.fromSecretKey(privateKey as `ed25519:${string}`));
 }
 
-/** View call at final head. */
+/** View call at the optimistic head: the seal and reveal steps must see the player's call the moment it lands. */
 export async function view<T>(method: string, args: Record<string, unknown> = {}): Promise<T> {
-  return (await provider.callFunction<T>({ contractId: GAME, method, args, blockQuery: { finality: 'final' } })) as T;
+  return (await provider.callFunction<T>({ contractId: GAME, method, args, blockQuery: { finality: 'optimistic' } })) as T;
 }
 
+/** Gas for a guest call. The function-call key pays from a small balance, so never the 300 Tgas default. */
+export const GUEST_GAS = 10n * 10n ** 12n;
 export const NEAR = 10n ** 24n;
 /** Thousandths of a NEAR as yocto, without floats. */
 export const milli = (n: number): bigint => BigInt(n) * 10n ** 21n;
