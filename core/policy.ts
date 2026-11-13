@@ -147,3 +147,41 @@ export function moveFor(pKeepBps: number, draw: number): Move {
 }
 
 export const NEUTRAL_READ = { promiseBps: 0, threatBps: 0, sincerityBps: 0 };
+
+/** Required params per policy kind. An outside agent picks a kind and sets its weights; nothing else is allowed. */
+const KIND_PARAMS: Record<string, string[]> = {
+  grudger: ['firstMaxBps', 'firstMinBps', 'afterApologyBps'],
+  mirror: ['firstMaxBps', 'firstMinBps', 'afterKeepBps', 'afterBreakBps'],
+  opportunist: ['baseBps', 'bigStakeBps', 'bigStakePenaltyBps', 'lowJarBps', 'lowJarPenaltyBps'],
+  saint: ['keepBps'],
+  coin: ['keepBps'],
+  statistician: ['maxGames', 'perGameValueBps', 'breakGainBps'],
+};
+
+/**
+ * Turn the policy string an outside agent stored on chain (enter_agent) into a CharacterSpec, or throw.
+ * Strict on purpose: a known kind, exactly its params, integers in range. A spec that passes here can go through
+ * decide() and the audit unchanged, so an outside agent is judged by the same public rules as the six.
+ */
+export function parseAgentPolicy(json: string, name: string): CharacterSpec {
+  if (!/^[A-Za-z0-9_-]{1,64}$/.test(name)) throw new Error('agent name must be 1..64 of letters, digits, - or _');
+  let raw: unknown;
+  try { raw = JSON.parse(json); } catch { throw new Error('policy is not valid JSON'); }
+  if (typeof raw !== 'object' || raw === null) throw new Error('policy must be a JSON object');
+  const { kind, doorMinKeepBps, params } = raw as { kind?: unknown; doorMinKeepBps?: unknown; params?: unknown };
+  if (typeof kind !== 'string' || !(kind in KIND_PARAMS)) throw new Error(`unknown kind, use one of ${Object.keys(KIND_PARAMS).join(', ')}`);
+  const inRange = (v: unknown, hi: number): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= hi;
+  if (!inRange(doorMinKeepBps, 10000)) throw new Error('doorMinKeepBps must be an integer 0..10000');
+  if (typeof params !== 'object' || params === null) throw new Error('params must be an object');
+  const p = params as Record<string, unknown>;
+  const need = KIND_PARAMS[kind];
+  const extra = Object.keys(p).filter((k) => !need.includes(k));
+  if (extra.length) throw new Error(`unexpected params: ${extra.join(', ')}`);
+  const out: Record<string, number> = {};
+  for (const k of need) {
+    if (!inRange(p[k], k === 'maxGames' ? 100 : 10000)) throw new Error(`param ${k} must be an integer in range`);
+    out[k] = p[k] as number;
+  }
+  if ('firstMinBps' in out && out.firstMinBps > out.firstMaxBps) throw new Error('firstMinBps must not exceed firstMaxBps');
+  return { name, kind, doorMinKeepBps, persona: `Outside agent ${name}. Its policy is public and on chain.`, params: out };
+}

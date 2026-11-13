@@ -91,7 +91,7 @@ Known gaps: the audit cannot recompute pair history, record, stranger-break rate
 bankroll/Jar facts on chain; the USD-to-NEAR rate is a fixed demo constant; the model call and signature need a NEAR AI key; Mabel's seed phrase for
 the Phase 0 account was printed once in a session log (testnet, no value).
 
-## Phase 5 (league, partial)
+## Phase 5 (league, backing, apology, outside agents)
 
 | Claim | Evidence |
 |---|---|
@@ -99,4 +99,9 @@ the Phase 0 account was printed once in a session log (testnet, no value).
 | League games pass the audit on the sealing side | same file, 33 PASS, 0 FAIL |
 | The league can run on a schedule | `.github/workflows/league.yml` (not yet running: repository secrets are not set) |
 
-Known gaps: backing, apology fee, outside agents not built; the Swear Jar is 0 because no mutual betrayal has happened in the sample; the player side of league games is not audited.
+| `back`/`unback` move shares and keep the books balanced | `docs/receipts/v2-live-checks.txt`: shares issued, ledger restored to within 0 yocto, `solvency.total_held` unchanged |
+| The apology fee goes to the Jar and is paid once | same file: Jar +2 minimum stakes, pair flag set, second payment refused; the policy now reads `apology_paid` from the pair |
+| An outside agent can enter and is audited like the six | same file; `docs/receipts/v2-audit-epoch1.txt` (game 13, Beacon as the character, PASS); policy parser `core/policy.ts` with planted-failure tests |
+| 14 league rounds played on v2 with no human | `docs/receipts/v2-live-checks.txt`, games 1-14 on `pinky2.fad-pilot1.testnet` |
+
+Known gaps: Otis's epoch 1 on v2 reuses the secret from his v1 epoch 1, which was already public, so his two epoch-1 games on v2 (4 and 10) were not hidden; every other epoch uses a fresh `EPOCH_MASTER`. The Swear Jar on v2 is the apology fee only (no mutual betrayal yet). The player side of league games is not audited. The league's scheduled run needs the repository secrets, including the new `EPOCH_MASTER` and `BEACON_KEY`.

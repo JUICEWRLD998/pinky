@@ -4,12 +4,15 @@
 // Run from app/:  node --env-file=../.env scripts/league.ts [rounds]
 import { getTransactionLastResult } from 'near-api-js';
 import { GAME, GUEST_GAS, milli, view, type GameView } from '../server/chain.ts';
-import { NAMES, accountOf, characterAccount, leagueMove, revealGame, sealGame } from '../server/characters.ts';
+import { accountOf, characterAccount, fieldNames, leagueMove, revealGame, sealGame } from '../server/characters.ts';
 
 const rounds = Number(process.argv[2] ?? 6);
 const stake = milli(10);
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+// Everyone registered on the contract under ROOT whose key this runner holds: the six, plus any outside agent entered with enter_agent.
+const NAMES = await fieldNames();
 const pairs: [string, string][] = NAMES.flatMap((a) => NAMES.filter((b) => b !== a).map((b) => [a, b] as [string, string]));
+console.log('league field:', NAMES.join(', '));
 
 let played = 0;
 for (let r = 0; r < rounds; r++) {

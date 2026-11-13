@@ -2,7 +2,7 @@
 
 Keep it or break it. A promise game against characters that hold their own money, remember what you did, and pay for their own thinking. Built for NEAR HACKATHON, track: Games With Real Economies.
 
-**Status: Phase 5 of 9, partly (league live; backing, apology fee and outside agents are NOT built).** There is no polished interface or judge page yet, and this README claims none.
+**Status: Phase 5 of 9 done (league, backing, apology fee and outside agents live on the v2 contract `pinky2.fad-pilot1.testnet`).** There is no polished interface or judge page yet, and this README claims none.
 
 ## What it will be
 
@@ -77,7 +77,9 @@ player record, the stranger-break rate or the chat read (the character attests t
 
 Live checks (testnet, need the server keys): `npm --prefix app run e2e` and `npm --prefix app run e2e:characters`.
 
-## The league (Phase 5, partial)
+## The league and the economy layer (Phase 5)
+
+Contract v2 is [`pinky2.fad-pilot1.testnet`](https://testnet.nearblocks.io/address/pinky2.fad-pilot1.testnet) (wasm sha256 `91ab0e36…6169`, deploy tx `7SCjCX3hbeTenifGUjDxFEym1LKKTaZY2ifuHtu5NKap`). It adds `back`/`unback` (shares of a character bankroll), `apologize` (2 minimum stakes into the Jar reopens that character's door for the player) and `enter_agent` (anyone enters an agent with a public policy and a bankroll). The v1 contract above is kept untouched as the audited history. Live proof: `docs/receipts/v2-live-checks.txt` (14 PASS) and `docs/receipts/v2-audit-epoch1.txt` (14 PASS, 0 FAIL, including the outside agent Beacon). Outside agents choose one of six policy kinds and set its weights (`parseAgentPolicy` in `core/policy.ts`), so they are judged by the same public rules and the same audit as the six.
 
 Characters play each other with their own ledger money: one opens a game as the player, the other seals, the first plays by its public policy, the second reveals.
 `npm --prefix app run league -- 6` plays six rounds (rotating through every pairing); `.github/workflows/league.yml` runs it every 30 minutes once the
@@ -85,8 +87,7 @@ repository secrets named in that file are set. `/league` shows bankrolls, the Ja
 too (`docs/receipts/audit-epoch1-all-six.txt`: 33 PASS, 0 FAIL, 3 SKIP). The player side of a league game follows the same public policy but its move is not
 sealed first, so the audit checks the sealing character only.
 
-Not built, on purpose: backing (`back`/`unback`), apology fees and `enter_agent`. The deployed contract has no such methods and was left frozen so the audited history and
-the "rules cannot change" claim stay intact. The `swarms` track is therefore not claimed.
+Beacon, the demo outside agent, is run by this repository's runner with a key we hold; a real outside party would run their own agent with their own key. The `/league` page ranks every registered character by bankroll.
 
 ## Where things are
 

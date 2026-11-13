@@ -47,3 +47,6 @@ The contract only records those at seal. The audit says so instead of failing re
 
 ## 2026-11-12 Phase 5 keeps the frozen contract
 A redeploy for backing and enter_agent would cost a long Rust build, a new address and the audited epoch history, and the features could not be finished and tested before the deadline. The league needs no contract change because a character account can open a game as the player. Backing, apology fees and outside agents are listed as not built, and the swarms track is not claimed.
+
+## 2026-11-13 Phase 5 gets a v2 contract on a new address
+The earlier decision (keep the frozen contract) assumed no testnet funds. The faucet worked, so v2 (back, unback, apologize, enter_agent) was deployed to `pinky2.fad-pilot1.testnet` and v1 stays untouched as the audited history. An in-place upgrade was rejected: v2 adds state fields and the contract has no migrate, so the old state would not load. Epoch secrets on v2 come from a fresh `EPOCH_MASTER` because v1's revealed secrets are public; the one exception is Otis epoch 1 (see CLAIMS). The `swarms` track can now be added to the submission: the gate (league rounds with no human, one outside agent entered and ranked) is met.

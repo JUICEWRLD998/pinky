@@ -1,10 +1,9 @@
 // Audit: read every game of a finished epoch from the chain and recompute each character decision from the
 // public policy. Needs no keys. Prints PASS, FAIL or SKIP per game; exit code 1 if any game FAILS.
 //   node app/scripts/audit.ts --epoch 1 [--character Otis]
-import { CHARACTERS } from '../../core/policy.ts';
 import { auditGame, type AuditConfig, type AuditGame } from '../../core/audit.ts';
 import { view } from '../server/chain.ts';
-import { accountOf } from '../server/characters.ts';
+import { specOf } from '../server/characters.ts';
 
 const arg = (k: string): string | undefined => { const i = process.argv.indexOf(`--${k}`); return i > 0 ? process.argv[i + 1] : undefined; };
 const epochArg = arg('epoch');
@@ -21,9 +20,13 @@ for (let id = 1; id < next; id++) {
 }
 
 let pass = 0, fail = 0, skip = 0;
-for (const spec of CHARACTERS) {
-  if (only && spec.name !== only) continue;
-  const account = accountOf(spec.name);
+// Every character on the contract: the six and any outside agent. An agent is judged by the policy it stored on chain.
+const accounts = (await view<[string, unknown][]>('list_characters')).map(([a]) => a).sort();
+for (const account of accounts) {
+  let spec;
+  try { spec = await specOf(account); } catch (e) { console.log(`
+${account}: SKIP ${(e as Error).message}`); continue; }
+  if (only && spec.name.toLowerCase() !== only.toLowerCase()) continue;
   const mine = games.filter((g) => g.character === account);
   if (mine.length === 0) continue;
   const secret = await view<string | null>('get_epoch_secret', { character: account, epoch });
