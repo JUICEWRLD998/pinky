@@ -17,6 +17,10 @@
   --break: oklch(0.68 0.21 33);
   --coin: oklch(0.85 0.16 88);
   --coin-deep: oklch(0.68 0.15 75);
+  /* chart series: the coin and keep hues stepped down into the band that reads on a dark surface
+     (dataviz validator, dark mode, surface --table-2: all checks pass) */
+  --chart-jar: oklch(0.67 0.135 82);
+  --chart-keep: oklch(0.665 0.11 180);
 
   /* type */
   --font-display: var(--f-display), 'Cooper Black', Georgia, serif;
