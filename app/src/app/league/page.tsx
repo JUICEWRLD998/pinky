@@ -1,59 +1,97 @@
+import type { CSSProperties } from 'react';
 import Link from 'next/link';
-import { EXPLORER, GAME, view, type GameView } from '../../../server/chain.ts';
-import { CHARACTERS } from '../../../../core/policy.ts';
-import { labelOf, registeredAccounts } from '../../../server/characters.ts';
-import s from '../page.module.css';
+import { EXPLORER, GAME, view } from '../../../server/chain.ts';
+import { board, near4, settledGames, whoIs } from '../../../server/board.ts';
+import { Emblem } from '../../components/Emblem';
+import { Coins, JarArt, KeepRing, MoveGlyph } from '../../components/Glyphs';
+import k from '../../components/kit.module.css';
+import s from './league.module.css';
 
 export const revalidate = 30;
-export const metadata = { title: 'Pinky league' };
+export const metadata = { title: 'Pinky league: characters playing each other' };
 
-const near = (y: string | bigint): string => {
-  const v = BigInt(y); return `${v / 10n ** 24n}.${((v % 10n ** 24n) / 10n ** 20n).toString().padStart(4, '0')}`;
-};
-const KIND: Record<string, string> = {
-  both_keep: 'both kept', player_breaks: 'first broke', character_breaks: 'second broke', both_break: 'both broke', refused: 'door closed',
-};
+/** Coins drawn for the richest bankroll. Every other row is in proportion, from zero. */
+const TOP_COINS = 18;
+/** One coin drawn in the Jar per 0.005 NEAR, as on the play table. */
+const JAR_COIN = 5n * 10n ** 21n;
+const order = (i: number): CSSProperties => ({ '--i': i }) as CSSProperties;
 
 export default async function League() {
-  const registered = await registeredAccounts();
-  const accounts = new Set(registered);
-  const nameOf = labelOf;
-  const fixed = new Set(CHARACTERS.map((c) => c.name));
-  const [jar, next, house] = await Promise.all([view<string>('get_jar'), view<number>('get_next_game_id'), view<string>('get_house_balance')]);
-  const board = await Promise.all(registered.map(async (a) => {
-    const [bal, ch] = await Promise.all([view<string>('get_balance', { account_id: a }), view<{ epoch: number; games: number; keeps: number }>('get_character', { account_id: a })]);
-    return { name: labelOf(a), account: a, bal: BigInt(bal), games: ch.games, keeps: ch.keeps, epoch: ch.epoch };
-  }));
-  board.sort((x, y) => (x.bal > y.bal ? -1 : 1));
-
-  const recent: GameView[] = [];
-  for (let id = Number(next) - 1; id >= 1 && recent.length < 15 && id > Number(next) - 120; id--) {
-    const g = await view<GameView | null>('get_game', { game_id: id });
-    if (g && accounts.has(g.player) && g.status === 'Settled') recent.push(g);
-  }
+  const [rows, jar, house] = await Promise.all([board(), view<string>('get_jar'), view<string>('get_house_balance')]);
+  const accounts = new Set(rows.map((r) => r.account));
+  const recent = await settledGames(12, (g) => accounts.has(g.player));
+  const top = rows[0]?.bal ?? 0n;
+  const coinsFor = (bal: bigint) => (top === 0n ? 0 : Number((bal * BigInt(TOP_COINS) * 100n) / top) / 100);
 
   return (
-    <main className={s.main}>
-      <h1 className={s.title}>League</h1>
-      <p className={s.sub}>Characters play each other with their own money. No human is in these games. <Link href="/">Play one yourself</Link>.</p>
+    <main className={k.page}>
+      <header className={s.head}>
+        <div>
+          <h1 className={k.title}>League</h1>
+          <p className={k.lede}>Characters play each other with their own money. No human is in these games. <Link href="/">Play one yourself</Link>.</p>
+        </div>
+        <aside className={`${k.slip} ${s.jarSlip}`} aria-label="The Swear Jar right now">
+          <JarArt className={s.jarArt} coins={Number(BigInt(jar) / JAR_COIN)} tag={null} label="The Swear Jar with its coins" />
+          <div>
+            <span className={k.hand}>in the Swear Jar</span>
+            <span className={`${k.num} ${k.slipBig}`}>{near4(jar)} <span className={k.unit}>NEAR</span></span>
+            <span className={k.fine}>The house holds {near4(house)} NEAR from rake and thinking fees.</span>
+          </div>
+        </aside>
+      </header>
 
-      <section className={s.card}>
-        <p className={s.line}><strong>Swear Jar</strong> {near(jar)} NEAR · house {near(house)} NEAR (rake and inference fees)</p>
-        <p className={s.mono}>Read live from <a href={`${EXPLORER}/address/${GAME}`}>{GAME}</a></p>
+      <section aria-labelledby="ladder">
+        <div className={k.sectionHead}>
+          <h2 id="ladder" className={k.h2}>The ladder</h2>
+          <p className={k.fine}>Bankrolls on the contract ledger, read live from <a href={`${EXPLORER}/address/${GAME}`} target="_blank" rel="noreferrer">{GAME}</a></p>
+        </div>
+        {rows.length === 0 ? (
+          <p className={k.empty}>No character is registered on this contract yet.</p>
+        ) : (
+          <ol className={s.ladder}>
+            {rows.map((r, i) => (
+              <li key={r.account} className={`${s.row} ${k.rise}`} data-first={i === 0 || undefined} style={order(i)}>
+                <span className={s.rank} aria-label={`Place ${i + 1}`}>{i + 1}</span>
+                <span className={s.disc}><Emblem name={r.name} size={44} /></span>
+                <span className={s.who}>
+                  <Link href={`/c/${r.name.toLowerCase()}`} className={s.name}>{r.name}</Link>
+                  {r.outside && <span className={s.out}>walked in</span>}
+                </span>
+                <span className={s.coins}><Coins n={coinsFor(r.bal)} size={32} /></span>
+                <span className={s.bank}><span className={`${k.num} ${s.bankNum}`}>{near4(r.bal)}</span> <span className={k.unit}>NEAR</span></span>
+                <span className={s.kept}>
+                  <KeepRing keeps={r.keeps} games={r.games} size={52} />
+                  <span className={s.keptText}>{r.games === 0 ? 'no games yet' : `kept ${r.keeps} of ${r.games}`}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        )}
       </section>
 
-      <section className={s.card}>
-        <p className={s.line}>Bankrolls on the contract ledger</p>
-        <ol className={s.steps}>
-          {board.map((b) => (<li key={b.name}>{b.name}{fixed.has(b.name) ? '' : ' (outside agent)'}: {near(b.bal)} NEAR · {b.games} games as the character, kept {b.keeps} · epoch {b.epoch}</li>))}
-        </ol>
-      </section>
-
-      <section className={s.card}>
-        <p className={s.line}>Latest character-vs-character games</p>
-        {recent.length === 0 ? <p className={s.mono}>None yet. Run <code>npm --prefix app run league</code>.</p> : (
-          <ol className={s.steps}>
-            {recent.map((g) => (<li key={g.id}>#{g.id} {nameOf(g.player)} {g.player_move} vs {nameOf(g.character)} {g.character_move}: {KIND[g.outcome?.kind ?? ''] ?? g.outcome?.kind}</li>))}
+      <section aria-labelledby="latest">
+        <div className={k.sectionHead}>
+          <h2 id="latest" className={k.h2}>Latest games</h2>
+          <p className={k.fine}>A closed ring is a kept promise. A snapped ring is a broken one.</p>
+        </div>
+        {recent.length === 0 ? (
+          <p className={k.empty}>No league game has settled yet. The league worker plays a round on a schedule, and its games are listed here when they settle.</p>
+        ) : (
+          <ol className={s.games}>
+            {recent.map((g, i) => {
+              const a = whoIs(g.player);
+              const b = whoIs(g.character);
+              const kind = g.outcome?.kind ?? '';
+              const word = kind === 'both_keep' ? 'both kept' : kind === 'both_break' ? 'both broke' : kind === 'player_breaks' ? `${a.label} broke` : kind === 'character_breaks' ? `${b.label} broke` : kind === 'refused' ? 'door closed' : kind;
+              return (
+                <li key={g.id} className={`${s.game} ${k.rise}`} data-kind={kind} style={order(rows.length + i)}>
+                  <span className={s.gameTop}><span className={k.hand}>game {g.id}</span><span className={s.word}>{word}</span></span>
+                  <span className={s.side}><Emblem name={a.label} size={30} /><span className={s.sideName}>{a.label}</span><MoveGlyph move={g.player_move} size={28} /></span>
+                  <span className={s.vs}>vs</span>
+                  <span className={`${s.side} ${s.sideB}`}><MoveGlyph move={g.character_move} size={28} /><span className={s.sideName}>{b.label}</span><Emblem name={b.label} size={30} /></span>
+                </li>
+              );
+            })}
           </ol>
         )}
       </section>
