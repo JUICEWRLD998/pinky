@@ -2,7 +2,7 @@
 import { Account, JsonRpcProvider, KeyPair, KeyPairSigner, getTransactionLastResult } from 'near-api-js';
 
 export const RPC = process.env.NEXT_PUBLIC_NEAR_RPC ?? 'https://test.rpc.fastnear.com';
-export const GAME = process.env.NEXT_PUBLIC_GAME_CONTRACT ?? 'pinky.fad-pilot1.testnet';
+export const GAME = process.env.NEXT_PUBLIC_GAME_CONTRACT ?? 'pinky2.fad-pilot1.testnet';
 export const ROOT = process.env.NEXT_PUBLIC_ROOT ?? 'fad-pilot1.testnet';
 export const accountOf = (name: string): string => `${name.toLowerCase()}.${ROOT}`;
 export const EXPLORER = 'https://testnet.nearblocks.io';
@@ -59,6 +59,12 @@ export async function viewGameWhen(id: number, status: Game['status'], tries = 2
 export async function balanceOf(accountId: string): Promise<bigint> {
   const b = await provider.callFunction<string>({ contractId: GAME, method: 'get_balance', args: { account_id: accountId }, blockQuery: { finality: 'optimistic' } });
   return BigInt(b ?? '0');
+}
+
+/** Yocto in the Swear Jar right now. */
+export async function jarOf(): Promise<bigint> {
+  const j = await provider.callFunction<string>({ contractId: GAME, method: 'get_jar', args: {}, blockQuery: { finality: 'optimistic' } });
+  return BigInt(j ?? '0');
 }
 
 export async function openGame(g: Guest, character: string): Promise<{ gameId: number; tx: string }> {

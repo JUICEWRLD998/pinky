@@ -105,3 +105,15 @@ the Phase 0 account was printed once in a session log (testnet, no value).
 | 14 league rounds played on v2 with no human | `docs/receipts/v2-live-checks.txt`, games 1-14 on `pinky2.fad-pilot1.testnet` |
 
 Known gaps: Otis's epoch 1 on v2 reuses the secret from his v1 epoch 1, which was already public, so his two epoch-1 games on v2 (4 and 10) were not hidden; every other epoch uses a fresh `EPOCH_MASTER`. The Swear Jar on v2 is the apology fee only (no mutual betrayal yet). The player side of league games is not audited. The league's scheduled run needs the repository secrets, including the new `EPOCH_MASTER` and `BEACON_KEY`.
+
+## Phase 6: the interface
+
+| Claim | Evidence |
+|---|---|
+| A stranger can play a full game on testnet through the interface | `docs/receipts/ui-live-game.txt` (five transactions, outcome `both_keep`); `docs/screens/play-1-talk-1280.png` to `play-4-result-1280.png` |
+| Four routes exist: play table, league, character page, Jar | `app/src/app/page.tsx`, `league/page.tsx`, `c/[name]/page.tsx`, `jar/page.tsx`; `docs/screens/` |
+| Every text pair in the palette clears WCAG AA and the four role inks are far apart | `docs/design/MEASURED.md`, written by `node app/scripts/measure-colors.mjs` (six planted controls) |
+| No route trips an automatic-fail tell in the interface scorer | `docs/receipts/ui-score/*.json`: play 84, league 87, character 84, Jar 83, `autoFail` 0, planted controls passed |
+| The reveal can be filmed without a chain call | `/?demo=both_keep`, `player_breaks`, `character_breaks`, `both_break`, `refused`; labelled on screen as a replay |
+
+Known gaps: the scores were taken before the last layout and accessibility fixes (commits `77a578d` to `3fe42de`) and were not taken again. Those fixes were built and type-checked; five of the changed layouts were looked at in a browser, and the skip link, the error recovery line and the stub focus colour were not. Three of the four routes score 83 to 84, under the scorer's own keep line; the named tells are `hero-overflows-fold` on the league and `multiple-accents` on the character page. One measured miss: the edge of an unselected character button is 1.42:1 against the table (the emblem and name carry the button). On a 320 by 568 phone the first button on the play table sits below the first screen (seen in `docs/screens/play-320.png`, button at about 580 px); on a 375 by 667 phone it is probably cut by the fold, which is an estimate from the layout and was not measured.

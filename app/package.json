@@ -19,6 +19,7 @@
     "deploy:v2": "node --env-file=../.env scripts/deploy-v2.ts"
   },
   "dependencies": {
+    "motion": "^14.13.0",
     "near-api-js": "^7.5.3",
     "next": "^16.4.6",
     "react": "^19.3.1",

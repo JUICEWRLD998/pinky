@@ -2,7 +2,7 @@
 import { Account, JsonRpcProvider, KeyPairSigner } from 'near-api-js';
 
 export const RPC = process.env.NEAR_RPC ?? 'https://test.rpc.fastnear.com';
-export const GAME = process.env.GAME_CONTRACT ?? 'pinky.fad-pilot1.testnet';
+export const GAME = process.env.GAME_CONTRACT ?? 'pinky2.fad-pilot1.testnet';
 export const ROOT = process.env.ROOT_ACCOUNT ?? 'fad-pilot1.testnet';
 export const GUESTS = `guests.${ROOT}`;
 export const OTIS = `otis.${ROOT}`;
