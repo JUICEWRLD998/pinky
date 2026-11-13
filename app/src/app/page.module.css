@@ -44,6 +44,7 @@
 .prompt { color: var(--paper); }
 .fine { color: var(--muted); font-size: var(--t-xs); }
 .err { color: var(--paper-ink); background: var(--break); border: var(--line) solid var(--ink); border-radius: var(--r-md); padding: var(--s-3) var(--s-4); font-weight: 600; box-shadow: var(--drop); animation: shake 280ms var(--ease-out); }
+.errNext { display: block; margin-top: var(--s-1); font-weight: 500; }
 @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-6px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-3px); } 100% { transform: translateX(0); } }
 
 .btnPrimary, .btnKeep, .btnBreak, .btnQuiet {
@@ -129,11 +130,11 @@
   font-weight: 700; font-size: var(--t-sm);
   transition: transform var(--dur-press) var(--ease-out), background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-press) var(--ease-out);
 }
-@media (hover: hover) { .pick:hover:not(:disabled):not([aria-checked='true']) { background: var(--table-3); } }
-.pick:active:not(:disabled) { transform: scale(0.97); }
-.pick[aria-checked='true'] { background: var(--paper); color: var(--paper-ink); border-color: var(--ink); box-shadow: var(--drop); }
+@media (hover: hover) { .pick:hover:not(:disabled):not([aria-pressed='true']) { background: var(--table-3); } }
+.pick:active:not(:disabled) { transform: scale(0.96); }
+.pick[aria-pressed='true'] { background: var(--paper); color: var(--paper-ink); border-color: var(--ink); box-shadow: var(--drop); }
 .pick:disabled { cursor: default; }
-.pick:disabled:not([aria-checked='true']) { opacity: 0.45; }
+.pick:disabled:not([aria-pressed='true']) { opacity: 0.45; }
 
 /* ---- the chain tape ---- */
 .tape { grid-area: tape; border-top: var(--line) dashed var(--table-3); padding-top: var(--s-4); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3) var(--s-5); min-height: 76px; }
@@ -141,6 +142,8 @@
 .stubs { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s-3); }
 .stub { display: flex; flex-direction: column; gap: 2px; background: var(--paper-2); color: var(--paper-ink); border: var(--line) solid var(--ink); border-radius: var(--r-sm); padding: var(--s-2) var(--s-3); font-weight: 700; font-size: var(--t-sm); box-shadow: 3px 3px 0 var(--ink); }
 .stub a { font-weight: 500; font-size: var(--t-xs); color: var(--paper-ink); text-decoration-color: var(--pink-deep); }
+/* the yellow focus ring has no contrast on paper */
+.stub :focus-visible { outline-color: var(--paper-ink); }
 
 /* ---- bands ---- */
 @media (max-width: 1099px) {

@@ -17,6 +17,7 @@ export function Shell({ children }: { children: ReactNode }) {
   return (
     <MotionConfig reducedMotion="user">
       <div className={s.shell}>
+        <a href="#content" className={s.skip}>Skip to content</a>
         <header className={s.bar}>
           <Link href="/" className={s.brand} aria-label="Pinky, home">
             <Mark size={26} />
@@ -29,6 +30,7 @@ export function Shell({ children }: { children: ReactNode }) {
             })}
           </nav>
         </header>
+        <span id="content" />
         {children}
         <footer className={s.foot}>Pinky runs on NEAR testnet with test chips. Every move is a transaction you can open.</footer>
       </div>

@@ -264,7 +264,7 @@ export default function Home() {
         {picking && (
           <button className={s.btnPrimary} onClick={sit}>{phase === 'done' ? `Play ${who} again` : `Sit down with ${who}`}</button>
         )}
-        {err && <p ref={errRef} tabIndex={-1} role="alert" className={s.err}>{err}</p>}
+        {err && <p ref={errRef} tabIndex={-1} role="alert" className={s.err}>{err}<span className={s.errNext}>Sit down again to retry. A game that already started carries on from where it stopped.</span></p>}
         {demo && <p className={s.fine}>Demo replay. No transaction is sent on this page.</p>}
 
         <div className={s.chips}>
@@ -290,9 +290,9 @@ export default function Home() {
         </AnimatePresence>
         <p className={s.fine}><Link href={`/c/${who.toLowerCase()}`}>{who}&rsquo;s wallet, policy and past promises</Link></p>
 
-        <div className={s.cast} role="radiogroup" aria-label="Choose who to play">
+        <div className={s.cast} role="group" aria-label="Choose who to play">
           {CHARACTERS.map((c) => (
-            <button key={c.name} role="radio" aria-checked={c.name === who} aria-label={c.name} disabled={!picking} className={s.pick} onClick={() => { setWho(c.name); setSaid(''); if (phase === 'done') { setPhase('pick'); setGame(null); setGameId(null); setTxs({}); } }}>
+            <button key={c.name} aria-pressed={c.name === who} aria-label={c.name} disabled={!picking} className={s.pick} onClick={() => { setWho(c.name); setSaid(''); if (phase === 'done') { setPhase('pick'); setGame(null); setGameId(null); setTxs({}); } }}>
               <Emblem name={c.name} size={40} />
               <span className={s.pickName}>{c.name}</span>
             </button>
@@ -310,7 +310,7 @@ export default function Home() {
               {tape.map((t) => (
                 <motion.li key={t.key} className={s.stub} layout initial={{ opacity: 0, y: 12, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={spring.settle}>
                   <span>{t.label(who)}</span>
-                  <a href={`${EXPLORER}/txns/${txs[t.key]}`} target="_blank" rel="noreferrer">{txs[t.key]!.slice(0, 8)}…</a>
+                  <a href={`${EXPLORER}/txns/${txs[t.key]}`} target="_blank" rel="noreferrer" aria-label={`${t.label(who)}: transaction ${txs[t.key]!.slice(0, 8)} on the explorer, opens in a new tab`}>{txs[t.key]!.slice(0, 8)}…</a>
                 </motion.li>
               ))}
             </AnimatePresence>

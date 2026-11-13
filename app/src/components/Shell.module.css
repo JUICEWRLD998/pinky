@@ -9,7 +9,14 @@
   transition: color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out), transform var(--dur-press) var(--ease-out);
 }
 @media (hover: hover) { .link:hover { color: var(--paper); background: var(--table-2); } }
-.link:active { transform: scale(0.97); }
+.link:active { transform: scale(0.96); }
+/* keyboard users jump past the bar; the link stays above the page until it has focus */
+.skip {
+  position: absolute; left: var(--s-4); top: var(--s-3); z-index: 10; padding: 10px 14px;
+  background: var(--paper); color: var(--paper-ink); border: var(--line) solid var(--ink); border-radius: var(--r-sm);
+  font-weight: 700; font-size: var(--t-sm); text-decoration: none; transform: translateY(-300%);
+}
+.skip:focus-visible { transform: translateY(0); }
 .on, .on:hover { color: var(--ink); background: var(--paper); }
 .foot { margin-top: auto; padding: var(--s-6) 0 var(--s-5); color: var(--muted); font-size: var(--t-xs); }
 @media (max-width: 480px) {
