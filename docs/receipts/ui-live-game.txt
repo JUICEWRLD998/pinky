@@ -1,0 +1,19 @@
+One guest game played through the Phase 6 interface, 2026-11-13.
+Production build (next build, next start), driven in a real browser by visible text.
+
+Contract   pinky2.fad-pilot1.testnet (NEAR testnet)
+Guest      g-172b0c56ca.guests.fad-pilot1.testnet
+Character  Otis
+Said       "I promise I will keep it."
+Moves      guest KEEP, Otis KEEP
+Outcome    both_keep, 0.0120 NEAR back to the guest, guest balance 0.0520 NEAR after
+
+Transactions, in order (open each at https://testnet.nearblocks.io/txns/<hash>)
+  You stake            qsQnX3jyECGzfnhSheqbmD2YMg2Le9qtA5oFzx2RFeV
+  Otis pays to reply   2n8zHGR3ttvuxpLpYSU6NuQG6z74hLG71e6CHyjWgLgA
+  Otis seals           7ovVvXtvtWDbKaiDLVfZYvqNmNANWYQL8majH9vASuca
+  You play             FSAcjHgsCbvBYvFQzic4sXXqCqaMm8iZD2LoUJMZQTgT
+  Otis reveals         BJgqm1mMMpYLue7mZtgbH25knyVaEH6bEaQf7mJKj3cD
+
+Browser console errors during the game: none.
+Screens: docs/screens/play-1-talk-1280.png to play-4-result-1280.png

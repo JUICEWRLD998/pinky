@@ -1,0 +1,392 @@
+{
+  "round": 2,
+  "label": "",
+  "url": "http://localhost:3112/c/otis",
+  "title": "Pinky: a character, its wallet and its rules",
+  "scoredAt": "2026-11-13T16:15:22.473Z",
+  "controlFailed": false,
+  "controls": [
+    {
+      "name": "contrast sampler reads a planted near-identical pair below 1.5:1",
+      "ok": true,
+      "saw": "1.02:1"
+    },
+    {
+      "name": "geometry+clustering finds the planted 64×64 accent block",
+      "ok": true,
+      "saw": "4096px found of 4096px planted across 4 cluster(s)"
+    },
+    {
+      "name": "font resolver answers with a family",
+      "ok": true,
+      "saw": "Probe Sans"
+    }
+  ],
+  "score": {
+    "total": 84,
+    "got": 89.37,
+    "cap": 107,
+    "parts": [
+      {
+        "key": "textContrast",
+        "cap": 20,
+        "got": 17.37,
+        "prov": "measured",
+        "detail": "worst 5.69:1 · 52/52 pairs at AA"
+      },
+      {
+        "key": "focusRing",
+        "cap": 8,
+        "got": 8,
+        "prov": "measured",
+        "detail": "9 control(s) draw a ring ≥2px · 100% of those clear 3:1 · 4 focus rule(s) mirrored to make :focus-visible measurable"
+      },
+      {
+        "key": "disabledStates",
+        "cap": 5,
+        "got": 3,
+        "prov": "measured",
+        "detail": "0/0 disableable control(s) express disabled in 3+ channels"
+      },
+      {
+        "key": "accentBudget",
+        "cap": 10,
+        "got": 10,
+        "prov": "measured",
+        "detail": "0.9% of the viewport carries the accent (target <5%)"
+      },
+      {
+        "key": "accentCount",
+        "cap": 4,
+        "got": 0,
+        "prov": "measured",
+        "detail": "3 chromatic accent surface(s) above the 0.05% area floor"
+      },
+      {
+        "key": "typeFamilies",
+        "cap": 5,
+        "got": 5,
+        "prov": "measured",
+        "detail": "3 families: text, display, hand"
+      },
+      {
+        "key": "displayFace",
+        "cap": 8,
+        "got": 8,
+        "prov": "measured",
+        "detail": "display face \"display\""
+      },
+      {
+        "key": "eyebrowGeometry",
+        "cap": 4,
+        "got": 4,
+        "prov": "measured",
+        "detail": "no eyebrow beside any heading — passes by absence (gate 54 default is eyebrow-off)"
+      },
+      {
+        "key": "honestMetrics",
+        "cap": 6,
+        "got": 5,
+        "prov": "measured",
+        "detail": "no oversized stat block either way"
+      },
+      {
+        "key": "lcpNotLazy",
+        "cap": 4,
+        "got": 4,
+        "prov": "measured",
+        "detail": "no above-fold image is lazy-loaded"
+      },
+      {
+        "key": "noEmojiIcons",
+        "cap": 3,
+        "got": 3,
+        "prov": "measured",
+        "detail": "no emoji used as an icon"
+      },
+      {
+        "key": "contentVisible",
+        "cap": 5,
+        "got": 5,
+        "prov": "measured",
+        "detail": "nothing sits at opacity<0.05 in the first viewport"
+      },
+      {
+        "key": "horizontalOverflow",
+        "cap": 6,
+        "got": 6,
+        "prov": "measured",
+        "detail": "clean at every viewport"
+      },
+      {
+        "key": "sectionRhythm",
+        "cap": 4,
+        "got": 2,
+        "prov": "measured",
+        "detail": "too few sections to judge rhythm"
+      },
+      {
+        "key": "macrostructureStamp",
+        "cap": 3,
+        "got": 3,
+        "prov": "measured",
+        "detail": "\"Duel table; --lightningcss-light: ; --lightningcss-dark: initial; color-scheme: dark; }\n@supports (color:lab(0% 0 0)) { :root { --table: lab(9.13115% 1.58023 -17.7379); --table-2: lab(14.9194% 1.27825 -19.5769); --table-3: lab(21.8697% .93472 -21.4328); --ink: lab(3.50571% .936449 -11.9506); --paper: lab(95.4676% -.196308 7.6842); --paper-2: lab(89.7023% .164479 11.6159); --paper-ink: lab(11.471% 1.24379 -17.7849); --paper-muted: lab(35.9979% -.62719 -14.5948); --muted: lab(74.3049% -1.10629 -14.7738); --pink: lab(67.3626% 61.5077 -5.54867); --pink-deep: lab(50.988% 64.1065 -5.79815); --keep: lab(78.4536% -45.5235 1.36937); --break: lab(60.9707% 63.8085 54.6078); --coin: lab(82.9102% 9.18889 73.7576); --coin-deep: lab(62.6869% 20.8918 72.9773); --chart-jar: lab(61.7808% 12.967 63.8296); --chart-keep: lab(62.5203% -38.4784 -.287843); } }\""
+      },
+      {
+        "key": "tokenDiscipline",
+        "cap": 8,
+        "got": 4,
+        "prov": "unknown",
+        "detail": "no source tree measured"
+      },
+      {
+        "key": "stateCoverage",
+        "cap": 4,
+        "got": 2,
+        "prov": "unknown",
+        "detail": "no source tree measured"
+      }
+    ]
+  },
+  "autoFail": 0,
+  "autoFailTells": [],
+  "verdict": "close — fix the majors",
+  "tells": [
+    {
+      "id": "multiple-accents",
+      "sev": "major",
+      "evidence": "3 chromatic accents: a.k0V68G_btn, p.B46ZSW_kind, span"
+    }
+  ],
+  "good": [],
+  "accent": {
+    "color": {
+      "r": 255,
+      "g": 111,
+      "b": 177,
+      "a": 1
+    },
+    "hue": 332.5,
+    "chroma": 0.56,
+    "area": 9195
+  },
+  "accentBudget": 0.01,
+  "accents": [
+    {
+      "color": {
+        "r": 255,
+        "g": 111,
+        "b": 177,
+        "a": 1
+      },
+      "hue": 332.5,
+      "chroma": 0.5647058823529412,
+      "area": 9195,
+      "ev": [
+        "a.k0V68G_btn"
+      ]
+    },
+    {
+      "color": {
+        "r": 249,
+        "g": 198,
+        "b": 53,
+        "a": 1
+      },
+      "hue": 44.38775510204084,
+      "chroma": 0.7871485943775101,
+      "area": 5920,
+      "ev": [
+        "p.B46ZSW_kind"
+      ]
+    },
+    {
+      "color": {
+        "r": 68,
+        "g": 217,
+        "b": 190,
+        "a": 1
+      },
+      "hue": 169.1275167785235,
+      "chroma": 0.6866359447004609,
+      "area": 1485,
+      "ev": [
+        "span",
+        "span"
+      ]
+    }
+  ],
+  "directionPair": false,
+  "ground": {
+    "r": 13,
+    "g": 26,
+    "b": 50,
+    "a": 1
+  },
+  "groundChroma": 0.74,
+  "fonts": {
+    "families": [
+      "text",
+      "display",
+      "hand"
+    ],
+    "display": "display",
+    "body": "text",
+    "weights": [
+      "400",
+      "600",
+      "700",
+      "800"
+    ]
+  },
+  "contrasts": {
+    "worst": {
+      "r": 5.686136365692226,
+      "tag": "span",
+      "cls": "k0V68G_hand B46ZSW_gameId",
+      "txt": "game 10",
+      "size": 24,
+      "weight": "600",
+      "dis": false
+    },
+    "failing": [],
+    "failAA": 0,
+    "failAAA": 0,
+    "textPairs": 52,
+    "passAA": 52,
+    "unmeasurableTransparent": [],
+    "exemptInactive": []
+  },
+  "interactive": 9,
+  "focusable": 9,
+  "disableable": 0,
+  "focusRulesMirrored": 4,
+  "focusRings": [
+    {
+      "tag": "a",
+      "w": 3,
+      "style": "solid",
+      "via": ":focus-visible",
+      "offset": 3,
+      "contrast": 10.865204904037364,
+      "shadow": null
+    },
+    {
+      "tag": "a",
+      "w": 3,
+      "style": "solid",
+      "via": ":focus-visible",
+      "offset": 3,
+      "contrast": 10.865204904037364,
+      "shadow": null
+    },
+    {
+      "tag": "a",
+      "w": 3,
+      "style": "solid",
+      "via": ":focus-visible",
+      "offset": 3,
+      "contrast": 10.865204904037364,
+      "shadow": null
+    },
+    {
+      "tag": "a",
+      "w": 3,
+      "style": "solid",
+      "via": ":focus-visible",
+      "offset": 3,
+      "contrast": 10.865204904037364,
+      "shadow": null
+    },
+    {
+      "tag": "a",
+      "w": 3,
+      "style": "solid",
+      "via": ":focus-visible",
+      "offset": 3,
+      "contrast": 10.865204904037364,
+      "shadow": "lab(3.50571 0.936449 -11.9506) 4px 4px 0px 0px"
+    },
+    {
+      "tag": "a",
+      "w": 3,
+      "style": "solid",
+      "via": ":focus-visible",
+      "offset": 3,
+      "contrast": 14.667477631307351,
+      "shadow": null
+    },
+    {
+      "tag": "a",
+      "w": 3,
+      "style": "solid",
+      "via": ":focus-visible",
+      "offset": 3,
+      "contrast": 14.667477631307351,
+      "shadow": null
+    },
+    {
+      "tag": "a",
+      "w": 3,
+      "style": "solid",
+      "via": ":focus-visible",
+      "offset": 3,
+      "contrast": 12.606631399449562,
+      "shadow": null
+    },
+    {
+      "tag": "a",
+      "w": 3,
+      "style": "solid",
+      "via": ":focus-visible",
+      "offset": 3,
+      "contrast": 12.606631399449562,
+      "shadow": null
+    }
+  ],
+  "overflow": {
+    "desktop": {
+      "scrollW": 1280,
+      "clientW": 1280,
+      "wide": []
+    },
+    "tablet": {
+      "scrollW": 768,
+      "clientW": 768,
+      "wide": []
+    },
+    "mobile": {
+      "scrollW": 375,
+      "clientW": 375,
+      "wide": []
+    }
+  },
+  "overflowOffenders": [],
+  "sections": 1,
+  "elements": 128,
+  "source": null,
+  "fixture": null,
+  "rubric": {
+    "version": 1,
+    "caps": {
+      "textContrast": 20,
+      "focusRing": 8,
+      "disabledStates": 5,
+      "accentBudget": 10,
+      "accentCount": 4,
+      "typeFamilies": 5,
+      "displayFace": 8,
+      "eyebrowGeometry": 4,
+      "honestMetrics": 6,
+      "lcpNotLazy": 4,
+      "noEmojiIcons": 3,
+      "contentVisible": 5,
+      "horizontalOverflow": 6,
+      "sectionRhythm": 4,
+      "macrostructureStamp": 3,
+      "tokenDiscipline": 8,
+      "stateCoverage": 4
+    }
+  },
+  "snapshot": null
+}
