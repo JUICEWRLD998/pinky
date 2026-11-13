@@ -22,13 +22,6 @@ const HABIT: Record<Archetype, string> = {
 };
 const sim = (x: bigint): string => (Number(x) / Number(UNIT)).toFixed(2);
 
-// chart geometry, in SVG units
-const W = 720;
-const H = 300;
-const M = { l: 44, r: 118, t: 14, b: 34 };
-const IW = W - M.l - M.r;
-const IH = H - M.t - M.b;
-const xOf = (round: number) => M.l + (round / ROUNDS) * IW;
 const ratePct = (p: Sample) => p.jarRateBps / 100;
 const keptPct = (p: Sample) => p.kkShare * 100;
 
@@ -40,6 +33,20 @@ export default function JarPage() {
   const [busy, setBusy] = useState(false);
   const [hover, setHover] = useState<number | null>(null);
   const raf = useRef(0);
+  // Chart geometry in SVG units. A phone gets its own narrower drawing, so type stays readable instead of shrinking.
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const q = window.matchMedia('(max-width: 719px)');
+    const on = () => setNarrow(q.matches);
+    on(); q.addEventListener('change', on);
+    return () => q.removeEventListener('change', on);
+  }, []);
+  const W = narrow ? 340 : 720;
+  const H = narrow ? 250 : 300;
+  const M = narrow ? { l: 36, r: 12, t: 12, b: 30 } : { l: 44, r: 118, t: 14, b: 34 };
+  const IW = W - M.l - M.r;
+  const IH = H - M.t - M.b;
+  const xOf = (round: number) => M.l + (round / ROUNDS) * IW;
 
   useEffect(() => { jarOf().then(setLive).catch(() => {}); }, []);
   useEffect(() => () => cancelAnimationFrame(raf.current), []);
@@ -166,7 +173,7 @@ export default function JarPage() {
                     <text x={M.l - 8} y={yOf(g) + 4} textAnchor="end" className={s.tick}>{g}%</text>
                   </g>
                 ))}
-                {[0, 2500, 5000, 7500, 10000].map((r) => (<text key={r} x={xOf(r)} y={H - 12} textAnchor={r === 0 ? 'start' : r === ROUNDS ? 'end' : 'middle'} className={s.tick}>{r === 0 ? 'round 0' : r.toLocaleString('en-US')}</text>))}
+                {(narrow ? [0, 5000, 10000] : [0, 2500, 5000, 7500, 10000]).map((r) => (<text key={r} x={xOf(r)} y={H - 12} textAnchor={r === 0 ? 'start' : r === ROUNDS ? 'end' : 'middle'} className={s.tick}>{r === 0 ? 'round 0' : r.toLocaleString('en-US')}</text>))}
                 {drawn.length > 1 && (
                   <>
                     <path d={pathOf(drawn, ratePct)} className={s.lineJar} />
@@ -178,7 +185,7 @@ export default function JarPage() {
                     {playing && <line x1={xOf(head.round)} x2={xOf(head.round)} y1={M.t} y2={M.t + IH} className={s.playhead} />}
                     <circle cx={xOf(head.round)} cy={yOf(ratePct(head))} r={5} className={s.dotJar} />
                     <circle cx={xOf(head.round)} cy={yOf(keptPct(head))} r={5} className={s.dotKept} />
-                    {done && (() => {
+                    {done && !narrow && (() => {
                       // direct labels at the line ends, nudged apart when the two lines finish close together
                       const yj = yOf(ratePct(head)); const yk = yOf(keptPct(head));
                       const gap = Math.abs(yj - yk) < 30 ? (30 - Math.abs(yj - yk)) / 2 : 0;
