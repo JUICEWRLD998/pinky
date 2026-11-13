@@ -101,3 +101,34 @@ test('moveFor: keep when the draw is below pKeep', () => {
   assert.equal(moveFor(0, 0), 'BREAK');
   assert.equal(moveFor(10000, 9999), 'KEEP');
 });
+
+// ---- outside agents: the on-chain policy string becomes a CharacterSpec, or is rejected ----
+import { parseAgentPolicy } from '../core/policy.ts';
+
+const asPolicy = (c: { kind: string; doorMinKeepBps: number; params: Record<string, number> }) =>
+  JSON.stringify({ kind: c.kind, doorMinKeepBps: c.doorMinKeepBps, params: c.params });
+
+test('parseAgentPolicy accepts every built-in character policy and decides identically', () => {
+  for (const c of CHARACTERS) {
+    const spec = parseAgentPolicy(asPolicy(c), c.name);
+    assert.deepEqual(decide(spec, fresh()), decide(c, fresh()), c.name);
+  }
+});
+
+test('parseAgentPolicy rejects bad policies (planted failures)', () => {
+  const good = { kind: 'saint', doorMinKeepBps: 0, params: { keepBps: 9800 } };
+  assert.doesNotThrow(() => parseAgentPolicy(asPolicy(good), 'ok'));
+  const bad: [string, string][] = [
+    ['not json', '{nope'],
+    ['unknown kind', asPolicy({ ...good, kind: 'wizard' })],
+    ['missing param', asPolicy({ ...good, params: {} })],
+    ['extra param', asPolicy({ ...good, params: { keepBps: 9800, sneaky: 1 } })],
+    ['param above 10000', asPolicy({ ...good, params: { keepBps: 10001 } })],
+    ['negative param', asPolicy({ ...good, params: { keepBps: -1 } })],
+    ['fractional param', asPolicy({ ...good, params: { keepBps: 99.5 } })],
+    ['door above 10000', asPolicy({ ...good, doorMinKeepBps: 10001 })],
+    ['firstMin above firstMax', asPolicy({ kind: 'mirror', doorMinKeepBps: 0, params: { firstMaxBps: 2000, firstMinBps: 3000, afterKeepBps: 9000, afterBreakBps: 1000 } })],
+  ];
+  for (const [why, p] of bad) assert.throws(() => parseAgentPolicy(p, 'x'), undefined, why);
+  assert.throws(() => parseAgentPolicy(asPolicy(good), 'bad name!'), undefined, 'name with spaces and punctuation');
+});

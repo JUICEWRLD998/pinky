@@ -14,7 +14,8 @@
     "setup:characters": "node --env-file=../.env scripts/setup-characters.ts",
     "epoch": "node --env-file=../.env scripts/epoch.ts",
     "league": "node --env-file=../.env scripts/league.ts",
-    "setup": "node --env-file=../.env scripts/setup.ts"
+    "setup": "node --env-file=../.env scripts/setup.ts",
+    "deploy:v2": "node --env-file=../.env scripts/deploy-v2.ts"
   },
   "dependencies": {
     "near-api-js": "^7.5.3",
