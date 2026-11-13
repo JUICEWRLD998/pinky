@@ -19,7 +19,7 @@ jobs:
         working-directory: app
         env:
           ROOT_ACCOUNT: fad-pilot1.testnet
-          GAME_CONTRACT: pinky.fad-pilot1.testnet
+          GAME_CONTRACT: pinky2.fad-pilot1.testnet
           NEAR_RPC: https://test.rpc.fastnear.com
           EPOCH_MASTER: ${{ secrets.EPOCH_MASTER }}
           READ_SECRET: ${{ secrets.READ_SECRET }}
@@ -30,3 +30,4 @@ jobs:
           PRUE_KEY: ${{ secrets.PRUE_KEY }}
           DICE_KEY: ${{ secrets.DICE_KEY }}
           ABACUS_KEY: ${{ secrets.ABACUS_KEY }}
+          BEACON_KEY: ${{ secrets.BEACON_KEY }}

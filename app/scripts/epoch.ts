@@ -3,11 +3,11 @@
 // Run from app/:  node --env-file=../.env scripts/epoch.ts [Name ...]
 import { epochCommit } from '../../core/rng.ts';
 import { GAME, ROOT, signerAccount, view, type GameView } from '../server/chain.ts';
-import { NAMES, accountOf, characterAccount, epochSecret } from '../server/characters.ts';
+import { accountOf, characterAccount, epochSecret, fieldNames } from '../server/characters.ts';
 
 interface Char { epoch: number; epoch_open: boolean; open_games: number }
 const only = process.argv.slice(2);
-const names = only.length ? only : NAMES;
+const names = only.length ? only : await fieldNames();
 const root = signerAccount(ROOT, process.env.ROOT_KEY);
 
 async function settleOverdue(account: string) {

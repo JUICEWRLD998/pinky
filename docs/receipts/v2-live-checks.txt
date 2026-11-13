@@ -1,0 +1,18 @@
+v2 contract pinky2.fad-pilot1.testnet, wasm sha256 91ab0e363a6282f7ef5256ed6c3a603c237f99f1285021fda9daa64631cb6169
+deploy tx 7SCjCX3hbeTenifGUjDxFEym1LKKTaZY2ifuHtu5NKap, new tx Cq88SoDvoTcEnzC8ZZbri4Lk6XgkjPgBjY92k1R2Bm1Y
+app/scripts/e2e-v2.ts, 2026-11-13:
+PASS  back: backer receives shares  shares 30000000000 tx HndE61FMYZSAhRGkRt8K1wsTKxEqkQrpsKkmxBRGJ1DK
+PASS  back: backer ledger fell by the amount
+PASS  back: pool total shares includes the backer
+PASS  unback: shares are gone  tx 28wdJ6hgtteGMxD6tuYfjfgruZxW6jgq6RdbBrxUnQXp
+PASS  unback: backer ledger back within 1 unit (1e12 yocto) of the start  diff 0 yocto
+PASS  solvency: total held unchanged by backing and unbacking  1620000000000000000000000 -> 1620000000000000000000000
+PASS  solvency: contract balance covers everything it owes
+PASS  apologize: the Jar grew by 2 minimum stakes  tx 4WH5MM2jxVEa26FMG7HFLmc3DznznUEQA8xRhk9KJfo2
+PASS  apologize: the player paid the same amount
+PASS  apologize: the pair flag is set
+PASS  apologize: paying twice is refused
+PASS  enter_agent: Beacon is registered with its policy and an open epoch  tx 2pQm2avnJdcwoPUVRYBLKYTuWRKNbf7xhWEX4uCoVvMs
+PASS  enter_agent: bankroll landed in the ledger
+PASS  enter_agent: an already registered account is refused
+league run (app/scripts/league.ts 14): 14/14 rounds played, field Abacus, beacon, Dice, Fenn, Mabel, Otis, Prue; games 1-14, Beacon played 7 of them (6 as player, game 13 as the defending character).

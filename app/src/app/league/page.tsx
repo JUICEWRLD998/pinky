@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { CHARACTERS } from '../../../../core/policy.ts';
 import { EXPLORER, GAME, view, type GameView } from '../../../server/chain.ts';
-import { accountOf } from '../../../server/characters.ts';
+import { CHARACTERS } from '../../../../core/policy.ts';
+import { labelOf, registeredAccounts } from '../../../server/characters.ts';
 import s from '../page.module.css';
 
 export const revalidate = 30;
@@ -15,13 +15,14 @@ const KIND: Record<string, string> = {
 };
 
 export default async function League() {
-  const accounts = new Set(CHARACTERS.map((c) => accountOf(c.name)));
-  const nameOf = (a: string) => CHARACTERS.find((c) => accountOf(c.name) === a)?.name ?? a;
+  const registered = await registeredAccounts();
+  const accounts = new Set(registered);
+  const nameOf = labelOf;
+  const fixed = new Set(CHARACTERS.map((c) => c.name));
   const [jar, next, house] = await Promise.all([view<string>('get_jar'), view<number>('get_next_game_id'), view<string>('get_house_balance')]);
-  const board = await Promise.all(CHARACTERS.map(async (c) => {
-    const a = accountOf(c.name);
+  const board = await Promise.all(registered.map(async (a) => {
     const [bal, ch] = await Promise.all([view<string>('get_balance', { account_id: a }), view<{ epoch: number; games: number; keeps: number }>('get_character', { account_id: a })]);
-    return { name: c.name, account: a, bal: BigInt(bal), games: ch.games, keeps: ch.keeps, epoch: ch.epoch };
+    return { name: labelOf(a), account: a, bal: BigInt(bal), games: ch.games, keeps: ch.keeps, epoch: ch.epoch };
   }));
   board.sort((x, y) => (x.bal > y.bal ? -1 : 1));
 
@@ -44,7 +45,7 @@ export default async function League() {
       <section className={s.card}>
         <p className={s.line}>Bankrolls on the contract ledger</p>
         <ol className={s.steps}>
-          {board.map((b) => (<li key={b.name}>{b.name}: {near(b.bal)} NEAR · {b.games} games as the character, kept {b.keeps} · epoch {b.epoch}</li>))}
+          {board.map((b) => (<li key={b.name}>{b.name}{fixed.has(b.name) ? '' : ' (outside agent)'}: {near(b.bal)} NEAR · {b.games} games as the character, kept {b.keeps} · epoch {b.epoch}</li>))}
         </ol>
       </section>
 

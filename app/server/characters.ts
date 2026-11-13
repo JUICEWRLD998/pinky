@@ -14,6 +14,19 @@ interface Rec { games: number; keeps: number; active: number }
 interface Config { y_max_bps: number; drip: number }
 
 export const NAMES = CHARACTERS.map((c) => c.name);
+
+/** Display name of a character account: the six keep their names, an outside agent is its account label. */
+export const labelOf = (account: string): string => CHARACTERS.find((c) => accountOf(c.name) === account)?.name ?? account.slice(0, -(ROOT.length + 1));
+
+/** Every character registered on the contract under ROOT: the six plus any outside agent that entered. */
+export async function registeredAccounts(): Promise<string[]> {
+  return (await view<[string, unknown][]>('list_characters')).map(([a]) => a).filter((a) => a.endsWith(`.${ROOT}`)).sort();
+}
+
+/** The league field this runner can play: registered characters whose key is in the environment. */
+export async function fieldNames(): Promise<string[]> {
+  return (await registeredAccounts()).map(labelOf).filter((n) => keyOf(n));
+}
 export const accountOf = (name: string): string => `${name.toLowerCase()}.${ROOT}`;
 /** Spec of one of the six fixed characters. Outside agents need the chain: use specOf. */
 export function specFor(account: string): CharacterSpec {
