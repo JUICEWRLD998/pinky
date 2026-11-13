@@ -1,7 +1,7 @@
 // The six characters: seal and reveal their moves. A move comes from the public policy (core/policy.ts) and a
 // private draw from the epoch secret. The language model never decides a move; it only writes lines and a bounded read.
 import { createHmac } from 'node:crypto';
-import { CHARACTERS, decide, moveFor, type CharacterSpec, type PolicyInputs } from '../../core/policy.ts';
+import { CHARACTERS, decide, moveFor, parseAgentPolicy, type CharacterSpec, type PolicyInputs } from '../../core/policy.ts';
 import { NEUTRAL, type Read } from '../../core/inference.ts';
 import { commitFor, drawBps, moveForCommit, saltFor } from '../../core/rng.ts';
 import { GAME, ROOT, signerAccount, view, type GameView, type Move } from './chain.ts';
@@ -9,18 +9,33 @@ import { GAME, ROOT, signerAccount, view, type GameView, type Move } from './cha
 /** Share of first-contact games where the stranger broke. Fixed until Phase 4 measures it from chain. */
 export const STRANGER_BREAK_BPS = 2000;
 
-interface Pair { games: number; player_keeps: number; player_breaks: number; last_player_move: Move | null; last_character_move: Move | null }
+interface Pair { games: number; player_keeps: number; player_breaks: number; last_player_move: Move | null; last_character_move: Move | null; apology_paid?: boolean }
 interface Rec { games: number; keeps: number; active: number }
 interface Config { y_max_bps: number; drip: number }
 
 export const NAMES = CHARACTERS.map((c) => c.name);
 export const accountOf = (name: string): string => `${name.toLowerCase()}.${ROOT}`;
+/** Spec of one of the six fixed characters. Outside agents need the chain: use specOf. */
 export function specFor(account: string): CharacterSpec {
   const s = CHARACTERS.find((c) => accountOf(c.name) === account);
   if (!s) throw new Error('not a Pinky character');
   return s;
 }
-const keyOf = (name: string): string | undefined => process.env[`${name.toUpperCase()}_KEY`];
+const keyOf = (name: string): string | undefined => process.env[`${name.toUpperCase().replace(/-/g, '_')}_KEY`];
+
+/**
+ * Spec of any character on the contract: one of the six, or an outside agent whose policy was stored on chain by
+ * enter_agent. The agent account must be <label>.<ROOT>; its label is its name here.
+ */
+export async function specOf(account: string): Promise<CharacterSpec> {
+  const fixed = CHARACTERS.find((c) => accountOf(c.name) === account);
+  if (fixed) return fixed;
+  const c = await view<{ policy?: string | null } | null>('get_character', { account_id: account });
+  if (!c?.policy) throw new Error(`${account} is not a character with a stored policy`);
+  const suffix = `.${ROOT}`;
+  if (!account.endsWith(suffix)) throw new Error(`${account} is outside ${ROOT}; this runner only plays agents under it`);
+  return parseAgentPolicy(c.policy, account.slice(0, -suffix.length));
+}
 export const characterAccount = (name: string) => signerAccount(accountOf(name), keyOf(name));
 
 /**
@@ -70,7 +85,7 @@ async function inputsBetween(player: string, character: string, stakeStr: string
     return cap < drip ? cap : drip;
   })();
   return {
-    vsPlayer: { games: pair.games, playerKeeps: pair.player_keeps, playerBreaks: pair.player_breaks, lastPlayerMove: pair.last_player_move, apologyPaid: false },
+    vsPlayer: { games: pair.games, playerKeeps: pair.player_keeps, playerBreaks: pair.player_breaks, lastPlayerMove: pair.last_player_move, apologyPaid: pair.apology_paid === true },
     record: { games: rec.games, keepRateBps: rec.games === 0 ? 5000 : Math.floor((rec.keeps * 10000) / rec.games) },
     strangerBreakRateBps: STRANGER_BREAK_BPS,
     stakeBps: Number((stake * 10000n) / (bankroll === 0n ? 1n : bankroll)),
@@ -84,7 +99,7 @@ export interface SealResult { game_id: number; refused: boolean; tx: string; rea
 /** Seal the character's move for a game that is waiting for it. `read` is the signed chat read, or neutral. */
 export async function sealGame(gameId: number, read: Read = NEUTRAL): Promise<SealResult> {
   const g = await gameWhen(gameId, 'Opened');
-  const spec = specFor(g.character);
+  const spec = await specOf(g.character);
   if (g.status !== 'Opened') throw new Error(`game is ${g.status}, not waiting for a seal`);
   const inp = await inputsFor(g, read);
   const d = decide(spec, inp);
@@ -106,7 +121,7 @@ export interface RevealResult { game_id: number; move: Move; tx: string }
 /** Reveal the character's move once the player has played. The move is whichever one matches the on-chain commit. */
 export async function revealGame(gameId: number): Promise<RevealResult> {
   const g = await gameWhen(gameId, 'Played');
-  const spec = specFor(g.character);
+  const spec = await specOf(g.character);
   if (g.status !== 'Played' || !g.commit) throw new Error(`game is ${g.status}, not waiting for a reveal`);
   const salt = saltFor(epochSecret(spec.name, g.epoch), id(gameId));
   const move = moveForCommit(id(gameId), salt, g.commit);
@@ -123,8 +138,8 @@ export async function revealGame(gameId: number): Promise<RevealResult> {
  */
 export async function leagueMove(gameId: number, playerName: string): Promise<{ move: Move; pKeepBps: number }> {
   const g = await gameWhen(gameId, 'Sealed');
-  const spec = CHARACTERS.find((c) => c.name === playerName)!;
   const me = accountOf(playerName);
+  const spec = await specOf(me);
   if (g.player !== me) throw new Error('not this character game');
   // From my side the opponent plays the "player" role in the pair history and the record.
   const inp = await inputsBetween(g.character, me, g.stake, NEUTRAL);
