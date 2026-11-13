@@ -9,3 +9,4 @@ out/
 .DS_Store
 contract/target/
 Cargo.lock.bak
+*.tsbuildinfo
