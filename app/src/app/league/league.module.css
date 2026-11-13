@@ -66,5 +66,9 @@
   .name { font-size: var(--t-lg); }
   .bankNum { font-size: 1.35rem; }
   .games { grid-template-columns: minmax(0, 1fr); }
-  .jarSlip { max-width: none; }
+  .jarSlip { max-width: none; grid-template-columns: 72px minmax(0, 1fr); }
+  .jarArt { width: 72px; }
+  .jarSlip > div > span:nth-child(2) { font-size: 1.9rem; white-space: nowrap; }
 }
+/* the yellow focus ring has no contrast on paper */
+.row[data-first] :focus-visible, .game :focus-visible { outline-color: var(--paper-ink); }

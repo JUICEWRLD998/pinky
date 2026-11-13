@@ -55,7 +55,7 @@
   .hero { grid-template-columns: auto minmax(0, 1fr); gap: var(--s-6); }
   .disc { width: 184px; height: 184px; }
   .disc svg { width: 112px; height: 112px; }
-  .wallet { grid-column: 1 / -1; max-width: 420px; transform: rotate(-1.2deg); }
+  .wallet { grid-column: 2; justify-self: start; max-width: 420px; transform: rotate(-1.2deg); }
   .cols { grid-template-columns: minmax(0, 1fr); }
   .promise { grid-template-columns: minmax(0, 1fr) auto; row-gap: var(--s-2); }
   .gameId { grid-column: 1; }
@@ -66,9 +66,10 @@
   .hero { grid-template-columns: minmax(0, 1fr); gap: var(--s-5); }
   .disc { width: 148px; height: 148px; }
   .disc svg { width: 92px; height: 92px; }
-  .wallet { max-width: none; }
+  .wallet { grid-column: 1; justify-self: stretch; max-width: none; }
   .policy { padding: var(--s-4) var(--s-4); }
   .record { grid-template-columns: minmax(0, 1fr); }
   .why { grid-template-columns: minmax(0, 1fr); }
   .meter { width: 120px; }
 }
+.promise :focus-visible { outline-color: var(--paper-ink); }
