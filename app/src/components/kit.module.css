@@ -15,6 +15,8 @@
 .slip { background: var(--paper); color: var(--paper-ink); border: var(--line) solid var(--ink); border-radius: var(--r-md); box-shadow: var(--drop); padding: var(--s-4) var(--s-5); }
 .slip .hand, .slip .fine { color: var(--paper-muted); }
 .slip a { text-decoration-color: var(--pink-deep); }
+/* the yellow focus ring has no contrast on paper */
+.slip :focus-visible { outline-color: var(--paper-ink); }
 .slipBig { display: block; font-size: 2.4rem; line-height: 1.05; }
 .unit { font-weight: 700; font-size: var(--t-sm); }
 

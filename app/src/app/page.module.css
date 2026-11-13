@@ -160,6 +160,8 @@
   .sub { max-width: 60ch; }
   .them { padding-top: 0; }
 }
+/* a wide tablet keeps the wide stage, so the first button stays in the first viewport */
+@media (min-width: 900px) and (max-width: 1099px) { .table { --stage-ar: 1.754; } }
 @media (max-width: 719px) {
   .table { --stage-ar: 1.053; --lift: 8px; grid-template-columns: minmax(0, 1fr); grid-template-areas: 'intro' 'band' 'jar' 'you' 'them' 'tape'; }
   .title { font-size: clamp(2.1rem, 11cqw, 3rem); }
@@ -168,8 +170,9 @@
   .emblem svg { width: 64px; height: 64px; }
   .name { font-size: var(--t-xl); }
   .speech { font-size: 1.45rem; }
-  .cast { grid-template-columns: repeat(6, 1fr); }
+  .cast { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--s-1); }
   .pickName { display: none; }
-  .pick { justify-content: center; padding: var(--s-1); }
+  .pick { justify-content: center; min-width: 0; padding: var(--s-1) 2px; }
+  .pick svg { width: 100%; max-width: 40px; height: auto; }
   .btnPrimary, .btnKeep, .btnBreak { min-height: 56px; font-size: var(--t-md); }
 }
