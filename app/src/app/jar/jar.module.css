@@ -9,11 +9,12 @@
 .readout > :last-child { flex-basis: 100%; overflow-wrap: anywhere; }
 .main { display: flex; flex-direction: column; gap: var(--s-6); min-width: 0; }
 
-.rules { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-4); }
-.rule { display: flex; flex-direction: column; gap: var(--s-2); font-size: var(--t-sm); line-height: 1.4; }
-.rule:nth-child(1) { transform: rotate(-1.2deg); }
-.rule:nth-child(2) { transform: rotate(0.8deg); }
-.rule:nth-child(3) { transform: rotate(-0.6deg); }
+/* one rule sheet, three lines: a printed card, not three feature tiles */
+.sheet { padding: var(--s-4) var(--s-6) var(--s-3); box-shadow: var(--drop-lg); transform: rotate(-0.5deg); }
+.sheetTitle { font-family: var(--font-hand); font-weight: 700; font-size: 1.7rem; line-height: 1; color: var(--paper-muted); }
+.rules { list-style: none; margin: var(--s-2) 0 0; padding: 0; }
+.rule { display: grid; grid-template-columns: 76px 150px minmax(0, 1fr); align-items: center; column-gap: var(--s-4); padding: var(--s-3) 0; font-size: var(--t-sm); line-height: 1.4; }
+.rule + .rule { border-top: 2px dashed var(--paper-2); }
 .rule strong { font-family: var(--font-display); font-weight: 400; font-size: var(--t-lg); line-height: 1; }
 .pair { display: flex; gap: 2px; }
 
@@ -85,7 +86,9 @@
   .jar { max-width: 300px; }
 }
 @media (max-width: 719px) {
-  .rules { grid-template-columns: minmax(0, 1fr); }
+  .sheet { padding: var(--s-4) var(--s-4) var(--s-2); }
+  .rule { grid-template-columns: 76px minmax(0, 1fr); row-gap: var(--s-1); }
+  .rule > :last-child { grid-column: 1 / -1; }
   .sim { padding: var(--s-6) var(--s-4) var(--s-4); }
   .simTag { right: var(--s-3); font-size: 1.3rem; }
   .results { grid-template-columns: minmax(0, 1fr); }

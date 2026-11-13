@@ -19,7 +19,7 @@
 .unit { font-weight: 700; font-size: var(--t-sm); }
 
 /* a raised panel on the table */
-.panel { background: var(--table-2); border: var(--line) solid var(--table-3); border-radius: var(--r-lg); padding: var(--s-5); }
+.panel { background: var(--table-2); border-radius: var(--r-lg); padding: var(--s-5); }
 
 .btn {
   appearance: none; cursor: pointer; text-decoration: none;

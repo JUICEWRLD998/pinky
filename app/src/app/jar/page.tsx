@@ -111,23 +111,26 @@ export default function JarPage() {
         </div>
 
         <div className={s.main}>
-          <ol className={s.rules} aria-label="How money moves">
-            <li className={`${k.slip} ${s.rule} ${k.rise}`}>
+          <section className={`${k.slip} ${s.sheet} ${k.rise}`} aria-labelledby="rules">
+            <h2 id="rules" className={s.sheetTitle}>How the money moves</h2>
+            <ol className={s.rules}>
+            <li className={s.rule}>
               <span className={s.pair}><MoveGlyph move="KEEP" size={34} /><MoveGlyph move="KEEP" size={34} /></span>
               <strong>Both keep</strong>
               <span>Each side gets its stake back, plus a bonus out of the Jar: up to half a stake, and never more than a fortieth of the Jar.</span>
             </li>
-            <li className={`${k.slip} ${s.rule} ${k.rise}`} style={{ animationDelay: '60ms' }}>
+            <li className={s.rule}>
               <span className={s.pair}><MoveGlyph move="KEEP" size={34} /><MoveGlyph move="BREAK" size={34} /></span>
               <strong>One breaks</strong>
               <span>The one who broke takes both stakes, less a 2% rake. The Jar gets nothing.</span>
             </li>
-            <li className={`${k.slip} ${s.rule} ${k.rise}`} style={{ animationDelay: '120ms' }}>
+            <li className={s.rule}>
               <span className={s.pair}><MoveGlyph move="BREAK" size={34} /><MoveGlyph move="BREAK" size={34} /></span>
               <strong>Both break</strong>
               <span>Nobody is paid. Both stakes drop into the Jar, less the rake.</span>
             </li>
-          </ol>
+            </ol>
+          </section>
 
           <section className={`${k.panel} ${s.sim}`} aria-labelledby="sim">
             <p className={s.simTag}>simulation, not live play</p>

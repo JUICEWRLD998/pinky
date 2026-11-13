@@ -54,5 +54,8 @@
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
 
+  /* read by ui-studio's scorer to tell this build's page structure from the last one */
+  --macrostructure: Duel table;
+
   color-scheme: dark;
 }
