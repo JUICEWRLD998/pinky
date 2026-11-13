@@ -244,13 +244,13 @@ export function Stage({ phase, outcome, staked, sealed, jarCoins, who, label }: 
       )}
 
       {/* the sealed tag: their move is on the chain before yours */}
-      <motion.g initial={false} animate={sealed && !done ? { opacity: 1, y: 0, rotate: -6 } : { opacity: 0, y: -18, rotate: -14 }} transition={spring.settle} style={{ transformOrigin: `${560 + OFF}px 60px`, transformBox: 'view-box' }}>
+      {sealed && !done && (<motion.g initial={{ opacity: 0, y: -18, rotate: -14 }} animate={{ opacity: 1, y: 0, rotate: -6 }} transition={spring.settle} style={{ transformOrigin: `${560 + OFF}px 60px`, transformBox: 'view-box' }}>
         <g transform={shift}>
         <rect x={506} y={22} width={112} height={44} rx={8} fill="var(--coin)" {...outline} strokeWidth={4} />
         <circle cx={528} cy={44} r={8} fill="none" stroke={INK} strokeWidth={4} />
         <text x={574} y={53} textAnchor="middle" className={s.sealTag}>sealed</text>
         </g>
-      </motion.g>
+      </motion.g>)}
 
       {/* coins: three a side */}
       {[0, 1, 2].map((i) => (<Coin key={`r${i}`} to={coinTarget('r', i, sealed, done ? outcome : null)} show={sealed} delay={settle(i + 3)} />))}
