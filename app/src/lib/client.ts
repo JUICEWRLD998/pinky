@@ -1,5 +1,6 @@
 // Browser side of the game. A guest key lives in localStorage; the key can only call the game contract.
-import { Account, JsonRpcProvider, KeyPair, KeyPairSigner, getTransactionLastResult } from 'near-api-js';
+import { Account, JsonRpcProvider, KeyPair, KeyPairSigner, actions, getTransactionLastResult } from 'near-api-js';
+import { refusalOf } from './refusal';
 
 export const RPC = process.env.NEXT_PUBLIC_NEAR_RPC ?? 'https://test.rpc.fastnear.com';
 export const GAME = process.env.NEXT_PUBLIC_GAME_CONTRACT ?? 'pinky2.fad-pilot1.testnet';
@@ -79,6 +80,25 @@ export async function playMove(g: Guest, gameId: number, move: Move): Promise<st
   return r.transaction.hash;
 }
 export const askReveal = (gameId: number) => post<{ game_id: number; move: Move; tx: string }>('/api/reveal', { game_id: gameId });
+
+/** One attempt the contract should refuse. `refused` holds the contract's words, or null if the call went through. */
+export interface Attempt { tx: string; refused: string | null }
+/** Send a call with the guest key and report what the contract said, without throwing when it fails. */
+export async function attempt(g: Guest, methodName: string, args: Record<string, unknown>): Promise<Attempt> {
+  const r = await account(g).signAndSendTransaction({ receiverId: GAME, actions: [actions.functionCall(methodName, args, GAS, 0n)], throwOnFailure: false });
+  return { tx: r.transaction.hash, refused: refusalOf(r) };
+}
+/** Ask the server to make the character send a reveal the contract should refuse. */
+export const askCheat = (gameId: number, kind: 'wrong_move' | 'replay') => post<Attempt & { sent: { character_move: Move } }>('/api/cheat', { game_id: gameId, kind });
+
+export interface PlayerRecord { games: number; keeps: number; active: number }
+export async function recordOf(accountId: string): Promise<PlayerRecord> {
+  return (await provider.callFunction({ contractId: GAME, method: 'get_record', args: { account_id: accountId }, blockQuery: { finality: 'optimistic' } })) as unknown as PlayerRecord;
+}
+/** What the contract account holds against what it owes: the first must cover the second. */
+export async function solvency(): Promise<{ account_balance: string; total_held: string }> {
+  return (await provider.callFunction({ contractId: GAME, method: 'solvency', args: {}, blockQuery: { finality: 'optimistic' } })) as unknown as { account_balance: string; total_held: string };
+}
 
 export const near = (yocto: bigint | string): string => {
   const y = BigInt(yocto); const whole = y / 10n ** 24n; const frac = (y % 10n ** 24n) / 10n ** 20n; // 4 decimals
